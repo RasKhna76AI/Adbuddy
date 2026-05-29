@@ -1,319 +1,718 @@
 import { supabase } from './supabase';
 
-// ── Destinations ───────────────────────────────────────────
+// ──────────────────────────────────────────────────────────
+// ── DATA TYPE & SCHEMA DEFINITIONS
+// ──────────────────────────────────────────────────────────
 
-export async function fetchDestinations(limit = 50) {
-  const { data, error } = await supabase
-    .from('destinations')
-    .select('*')
-    .order('featured', { ascending: false })
-    .order('rating', { ascending: false })
-    .limit(limit);
-  if (error) throw error;
-  return (data ?? []).map(d => ({
-    id: d.id as number,
-    name: d.name as string,
-    country: d.country as string,
-    description: d.description as string | null,
-    imageUrl: d.image_url as string,
-    rating: d.rating as number,
-    reviewCount: d.review_count as number,
-    price: d.price as number,
-    duration: d.duration as string | null,
-    featured: d.featured as boolean,
-    category: d.category as string | null,
-  }));
+export interface UserProfile {
+  id: string;
+  full_name: string | null;
+  email: string | null;
+  mobile: string | null;
+  avatar_url: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
-export async function fetchTopDestinations() {
-  const { data, error } = await supabase
-    .from('destinations')
-    .select('*')
-    .order('rating', { ascending: false })
-    .limit(6);
-  if (error) throw error;
-  return (data ?? []).map(d => ({
-    id: d.id as number,
-    name: d.name as string,
-    country: d.country as string,
-    imageUrl: d.image_url as string,
-    rating: d.rating as number,
-    reviewCount: d.review_count as number,
-    price: d.price as number,
-    duration: d.duration as string | null,
-  }));
+export interface Transaction {
+  id: number;
+  user_id: string;
+  order_id: number | null;
+  trip_id: number | null;
+  packageTitle: string | null;
+  package_title?: string | null; // For database compliance fallback
+  amount: number;
+  status: string;
+  paymentMethod: string | null;
+  payment_method?: string | null; // For database compliance fallback
+  payment_id: string | null;
+  createdAt: string;
+  created_at?: string; // For database compliance fallback
 }
 
-export async function fetchDestination(id: number) {
+export interface Trip {
+  id: number;
+  user_id: string;
+  order_id: number | null;
+  package_id: number | null;
+  package_title: string | null;
+  destination_name: string | null;
+  image_url: string | null;
+  status: string;
+  travel_date: string;
+  return_date: string | null;
+  travelers: number;
+  price: number;
+  is_favorite: boolean;
+  created_at: string;
+}
+
+export interface UserAddress {
+  id: number;
+  user_id: string;
+  label: string;
+  address_line: string;
+  city: string;
+  state: string | null;
+  country: string;
+  pincode: string | null;
+  is_default: boolean;
+  created_at: string;
+}
+
+export interface PackageSummary {
+  id: number;
+  title: string;
+  destination_name: string | null;
+  image_url: string;
+  price: number;
+  duration: string;
+  rating: number | null;
+}
+
+export interface CartItem {
+  id: number;
+  user_id: string;
+  package_id: number;
+  quantity: number;
+  travelers: number;
+  added_at: string;
+  package?: PackageSummary;
+}
+
+export interface OrderItem {
+  id: number;
+  order_id: number;
+  package_id: number | null;
+  package_title: string;
+  destination: string | null;
+  image_url: string | null;
+  unit_price: number;
+  travelers: number;
+  total_price: number;
+}
+
+export interface Order {
+  id: number;
+  user_id: string;
+  order_number: string;
+  total_amount: number;
+  status: string;
+  payment_method: string | null;
+  payment_id: string | null;
+  payment_status: string;
+  traveler_name: string | null;
+  traveler_email: string | null;
+  traveler_mobile: string | null;
+  travel_date: string | null;
+  notes: string | null;
+  created_at: string;
+  order_items?: OrderItem[];
+}
+
+export interface Destination {
+  id: number;
+  name: string;
+  country: string;
+  description?: string | null;
+  imageUrl?: string;
+  image_url?: string | null;
+  rating: number;
+  reviewCount?: number;
+  review_count?: number | null;
+  price: number;
+  duration?: string | null;
+  featured?: boolean | null;
+  category?: string | null;
+}
+
+export interface Package {
+  id: number;
+  title: string;
+  destinationId?: number;
+  destinationName?: string | null;
+  description?: string | null;
+  imageUrl: string;
+  price: number;
+  originalPrice?: number | null;
+  duration: string;
+  groupSize?: number | null;
+  rating: number;
+  reviewCount: number;
+  featured: boolean;
+  includes?: string | null;
+}
+
+export interface TopDestination {
+  id: number;
+  name: string;
+  country: string;
+  imageUrl: string;
+  rating: number;
+  reviewCount: number;
+  price: number;
+  duration?: string | null;
+}
+
+export interface PopularPackage {
+  id: number;
+  title: string;
+  imageUrl: string;
+  price: number;
+  originalPrice?: number | null;
+  duration: string;
+  groupSize?: number | null;
+  rating: number;
+  reviewCount: number;
+  featured: boolean;
+  destinationName?: string | null;
+}
+
+export interface GalleryImage {
+  id: number;
+  title: string;
+  imageUrl: string;
+  location?: string | null;
+}
+
+export interface Testimonial {
+  id: number;
+  name: string;
+  review: string;
+  rating: number;
+  avatarUrl?: string | null;
+  location?: string | null;
+}
+
+export interface BlogPost {
+  id: number;
+  title: string;
+  imageUrl: string;
+  excerpt?: string | null;
+  content?: string | null;
+  author?: string | null;
+  author_avatar?: string | null;
+  category?: string | null;
+  readTime?: string | null;
+  published_at?: string | null;
+}
+
+export interface HomepageStats {
+  totalDestinations: number;
+  totalPackages: number;
+  totalTravelers: number;
+  yearsExperience: number;
+}
+
+export interface ReviewComment {
+  id: number;
+  review_id: number;
+  user_id: string;
+  user_name: string;
+  avatar_url: string | null;
+  comment: string;
+  created_at: string;
+}
+
+export interface Review {
+  id: number;
+  package_id: number;
+  user_id: string;
+  user_name: string;
+  avatar_url: string | null;
+  rating: number;
+  title: string | null;
+  comment: string;
+  likes_count: number;
+  verified: boolean;
+  created_at: string;
+  review_comments?: ReviewComment[];
+  user_liked?: boolean;
+}
+
+export interface Notification {
+  id: number;
+  user_id: string;
+  title: string;
+  message: string;
+  type: string;
+  read: boolean;
+  action_url: string | null;
+  created_at: string;
+}
+
+export interface Offer {
+  id: number;
+  title: string;
+  description: string | null;
+  image_url: string | null;
+  discount_percent: number | null;
+  discount_amount: number | null;
+  coupon_code: string | null;
+  package_id: number | null;
+  destination_id: number | null;
+  valid_from: string;
+  valid_until: string | null;
+  active: boolean;
+  badge: string | null;
+  created_at: string;
+}
+
+export interface CancelHistory {
+  id: number;
+  user_id: string;
+  order_id: number | null;
+  order_number: string | null;
+  package_title: string | null;
+  destination: string | null;
+  original_amount: number | null;
+  refund_amount: number | null;
+  refund_status: string | null;
+  reason: string | null;
+  cancelled_at: string;
+}
+
+// ──────────────────────────────────────────────────────────
+// ── USER PROFILE & IDENTIFICATION
+// ──────────────────────────────────────────────────────────
+
+export async function getUserProfile(userId: string) {
   const { data, error } = await supabase
-    .from('destinations')
+    .from('user_profiles')
     .select('*')
-    .eq('id', id)
+    .eq('id', userId)
     .single();
-  if (error) throw error;
-  return {
-    id: data.id as number,
-    name: data.name as string,
-    country: data.country as string,
-    description: data.description as string | null,
-    imageUrl: data.image_url as string,
-    rating: data.rating as number,
-    reviewCount: data.review_count as number,
-    price: data.price as number,
-    duration: data.duration as string | null,
-    featured: data.featured as boolean,
-  };
+
+  return { data: data as UserProfile | null, error };
 }
 
-// ── Packages ───────────────────────────────────────────────
-
-export async function fetchPackages(opts?: { destinationId?: number; limit?: number }) {
-  let q = supabase
-    .from('packages')
-    .select('*')
-    .order('featured', { ascending: false })
-    .order('rating', { ascending: false })
-    .limit(opts?.limit ?? 50);
-  if (opts?.destinationId) {
-    q = q.eq('destination_id', opts.destinationId);
-  }
-  const { data, error } = await q;
-  if (error) throw error;
-  return (data ?? []).map(p => ({
-    id: p.id as number,
-    title: p.title as string,
-    destinationId: p.destination_id as number,
-    destinationName: p.destination_name as string | null,
-    description: p.description as string | null,
-    imageUrl: p.image_url as string,
-    price: p.price as number,
-    originalPrice: p.original_price as number | null,
-    duration: p.duration as string,
-    groupSize: p.group_size as number | null,
-    rating: p.rating as number,
-    reviewCount: p.review_count as number,
-    featured: p.featured as boolean,
-    includes: p.includes as string | null,
-  }));
-}
-
-export async function fetchPopularPackages() {
+export async function upsertUserProfile(userId: string, updates: Partial<UserProfile>) {
   const { data, error } = await supabase
-    .from('packages')
-    .select('*')
-    .order('rating', { ascending: false })
-    .limit(6);
-  if (error) throw error;
-  return (data ?? []).map(p => ({
-    id: p.id as number,
-    title: p.title as string,
-    destinationName: p.destination_name as string | null,
-    imageUrl: p.image_url as string,
-    price: p.price as number,
-    originalPrice: p.original_price as number | null,
-    duration: p.duration as string,
-    groupSize: p.group_size as number | null,
-    rating: p.rating as number,
-    reviewCount: p.review_count as number,
-    featured: p.featured as boolean,
-  }));
-}
-
-export async function fetchPackage(id: number) {
-  const { data, error } = await supabase
-    .from('packages')
-    .select('*')
-    .eq('id', id)
+    .from('user_profiles')
+    .upsert({
+      id: userId,
+      ...updates,
+      updated_at: new Date().toISOString(),
+    })
+    .select()
     .single();
-  if (error) throw error;
+
+  return { data: data as UserProfile | null, error };
+}
+
+// ──────────────────────────────────────────────────────────
+// ── HOMEPAGE DATA AGGREGATIONS
+// ──────────────────────────────────────────────────────────
+
+export async function fetchHomepageStats(): Promise<HomepageStats> {
+  const [{ count: totalDestinations }, { count: totalPackages }, { count: totalTravelers }] =
+    await Promise.all([
+      supabase.from('destinations').select('*', { count: 'exact', head: true }),
+      supabase.from('packages').select('*', { count: 'exact', head: true }),
+      supabase.from('orders').select('*', { count: 'exact', head: true }),
+    ]);
+
   return {
-    id: data.id as number,
-    title: data.title as string,
-    destinationId: data.destination_id as number,
-    destinationName: data.destination_name as string | null,
-    description: data.description as string | null,
-    imageUrl: data.image_url as string,
-    price: data.price as number,
-    originalPrice: data.original_price as number | null,
-    duration: data.duration as string,
-    groupSize: data.group_size as number | null,
-    rating: data.rating as number,
-    reviewCount: data.review_count as number,
-    featured: data.featured as boolean,
-    includes: data.includes as string | null,
-  };
-}
-
-// ── Gallery ────────────────────────────────────────────────
-
-export async function fetchGallery(limit = 50) {
-  const { data, error } = await supabase
-    .from('gallery')
-    .select('*')
-    .limit(limit);
-  if (error) throw error;
-  return (data ?? []).map(g => ({
-    id: g.id as number,
-    imageUrl: g.image_url as string,
-    title: g.title as string,
-    location: g.location as string | null,
-    category: g.category as string | null,
-  }));
-}
-
-// ── Blog ───────────────────────────────────────────────────
-
-export async function fetchBlogPosts(limit = 20) {
-  const { data, error } = await supabase
-    .from('blog_posts')
-    .select('*')
-    .order('published_at', { ascending: false })
-    .limit(limit);
-  if (error) throw error;
-  return (data ?? []).map(b => ({
-    id: b.id as number,
-    title: b.title as string,
-    excerpt: b.excerpt as string | null,
-    content: b.content as string | null,
-    imageUrl: b.image_url as string,
-    author: b.author as string | null,
-    authorAvatar: b.author_avatar as string | null,
-    category: b.category as string | null,
-    readTime: b.read_time as string | null,
-    publishedAt: b.published_at as string,
-  }));
-}
-
-export async function fetchBlogPost(id: number) {
-  const { data, error } = await supabase
-    .from('blog_posts')
-    .select('*')
-    .eq('id', id)
-    .single();
-  if (error) throw error;
-  return {
-    id: data.id as number,
-    title: data.title as string,
-    excerpt: data.excerpt as string | null,
-    content: data.content as string | null,
-    imageUrl: data.image_url as string,
-    author: data.author as string | null,
-    authorAvatar: data.author_avatar as string | null,
-    category: data.category as string | null,
-    readTime: data.read_time as string | null,
-    publishedAt: data.published_at as string,
-  };
-}
-
-// ── Testimonials ───────────────────────────────────────────
-
-export async function fetchTestimonials() {
-  const { data, error } = await supabase
-    .from('testimonials')
-    .select('*')
-    .order('id', { ascending: true });
-  if (error) throw error;
-  return (data ?? []).map(t => ({
-    id: t.id as number,
-    name: t.name as string,
-    avatarUrl: t.avatar_url as string | null,
-    location: t.location as string | null,
-    review: t.review as string,
-    rating: t.rating as number,
-    tripDestination: t.trip_destination as string | null,
-  }));
-}
-
-// ── Homepage Stats ─────────────────────────────────────────
-
-export async function fetchHomepageStats() {
-  const [{ count: destCount }, { count: pkgCount }, { count: tripCount }] = await Promise.all([
-    supabase.from('destinations').select('*', { count: 'exact', head: true }),
-    supabase.from('packages').select('*', { count: 'exact', head: true }),
-    supabase.from('orders').select('*', { count: 'exact', head: true }),
-  ]);
-  return {
-    totalDestinations: destCount ?? 12,
-    totalPackages: pkgCount ?? 8,
-    totalTravelers: Math.max((tripCount ?? 0) * 3, 1000),
+    totalDestinations: totalDestinations ?? 0,
+    totalPackages: totalPackages ?? 0,
+    totalTravelers: totalTravelers ?? 0,
     yearsExperience: 10,
   };
 }
 
-// ── Trips ──────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────
+// ── DESTINATIONS DATA LAYER
+// ──────────────────────────────────────────────────────────
 
-export async function fetchTrips(userId: string, status?: string) {
-  let q = supabase
+export async function fetchDestinations(limit = 50): Promise<Destination[]> {
+  const { data, error } = await supabase
+    .from('destinations')
+    .select('*')
+    .order('featured', { ascending: false })
+    .order('rating', { ascending: false })
+    .limit(limit);
+
+  if (error) throw error;
+
+  return (data ?? []).map((d) => ({
+    id: d.id,
+    name: d.name || 'Unnamed Spot',
+    country: d.country || 'Unknown',
+    description: d.description || '',
+    imageUrl: d.image_url || '',
+    image_url: d.image_url || '',
+    rating: d.rating ?? 0,
+    reviewCount: d.review_count ?? 0,
+    review_count: d.review_count ?? 0,
+    price: d.price ?? 0,
+    duration: d.duration ?? null,
+    // CRITICAL FIX: Explicitly fall back to false if the database field is null
+    featured: d.featured === true, 
+    // CRITICAL FIX: Trim whitespace and handle empty categories safely
+    category: d.category ? d.category.trim() : 'Nature', 
+  }));
+}
+
+export async function fetchTopDestinations(limit = 8): Promise<TopDestination[]> {
+  const { data, error } = await supabase
+    .from('destinations')
+    .select('id, name, country, image_url, rating, review_count, price, duration')
+    .order('rating', { ascending: false })
+    .limit(limit);
+
+  if (error) throw error;
+
+  return (data ?? []).map((d) => ({
+    id: d.id,
+    name: d.name,
+    country: d.country,
+    imageUrl: d.image_url,
+    rating: d.rating ?? 0,
+    reviewCount: d.review_count ?? 0,
+    price: d.price ?? 0,
+    duration: d.duration ?? null,
+  }));
+}
+
+export async function fetchDestination(id: number): Promise<Destination | null> {
+  const { data, error } = await supabase
+    .from('destinations')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error) {
+    console.error(error);
+    return null;
+  }
+
+  return {
+    id: data.id,
+    name: data.name,
+    country: data.country,
+    description: data.description,
+    imageUrl: data.image_url,
+    image_url: data.image_url,
+    rating: data.rating ?? 0,
+    reviewCount: data.review_count ?? 0,
+    review_count: data.review_count ?? 0,
+    price: data.price ?? 0,
+    duration: data.duration ?? null,
+    featured: data.featured ?? false,
+    category: data.category ?? null,
+  };
+}
+
+// ──────────────────────────────────────────────────────────
+// ── PACKAGES DATA LAYER
+// ──────────────────────────────────────────────────────────
+
+export async function fetchPackages(filters?: {
+  destinationId?: number;
+  featured?: boolean;
+  limit?: number;
+}): Promise<Package[]> {
+  let query = supabase
+    .from('packages')
+    .select('*')
+    .order('featured', { ascending: false })
+    .order('rating', { ascending: false });
+
+  if (filters?.destinationId) {
+    query = query.eq('destination_id', filters.destinationId);
+  }
+  if (filters?.featured) {
+    query = query.eq('featured', true);
+  }
+  if (filters?.limit) {
+    query = query.limit(filters.limit);
+  }
+
+  const { data, error } = await query;
+  if (error) throw error;
+
+  return (data ?? []).map((pkg) => ({
+    id: pkg.id,
+    title: pkg.title,
+    destinationId: pkg.destination_id,
+    destinationName: pkg.destination_name,
+    description: pkg.description,
+    imageUrl: pkg.image_url,
+    price: pkg.price ?? 0,
+    originalPrice: pkg.original_price ?? null,
+    duration: pkg.duration ?? '',
+    groupSize: pkg.group_size ?? null,
+    rating: pkg.rating ?? 0,
+    reviewCount: pkg.review_count ?? 0,
+    featured: pkg.featured ?? false,
+    includes: pkg.includes ?? null,
+  }));
+}
+
+export async function fetchPopularPackages(limit = 6): Promise<PopularPackage[]> {
+  const { data, error } = await supabase
+    .from('packages')
+    .select('id, title, image_url, price, original_price, duration, group_size, rating, review_count, featured, destination_name')
+    .order('featured', { ascending: false })
+    .order('rating', { ascending: false })
+    .limit(limit);
+
+  if (error) throw error;
+
+  return (data ?? []).map((pkg) => ({
+    id: pkg.id,
+    title: pkg.title,
+    imageUrl: pkg.image_url,
+    price: pkg.price ?? 0,
+    originalPrice: pkg.original_price ?? null,
+    duration: pkg.duration ?? '',
+    groupSize: pkg.group_size ?? null,
+    rating: pkg.rating ?? 0,
+    reviewCount: pkg.review_count ?? 0,
+    featured: pkg.featured ?? false,
+    destinationName: pkg.destination_name ?? null,
+  }));
+}
+
+export async function fetchPackage(id: number): Promise<Package | null> {
+  const { data, error } = await supabase
+    .from('packages')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error) {
+    console.error(error);
+    return null;
+  }
+
+  return {
+    id: data.id,
+    title: data.title,
+    destinationId: data.destination_id,
+    destinationName: data.destination_name,
+    description: data.description,
+    imageUrl: data.image_url,
+    price: data.price ?? 0,
+    originalPrice: data.original_price ?? null,
+    duration: data.duration,
+    groupSize: data.group_size ?? null,
+    rating: data.rating ?? 0,
+    reviewCount: data.review_count ?? 0,
+    featured: data.featured ?? false,
+    includes: data.includes ?? null,
+  };
+}
+
+// ──────────────────────────────────────────────────────────
+// ── MEDIA & MEDIA GALLERY ARCHIVE
+// ──────────────────────────────────────────────────────────
+
+export async function fetchGallery(limit = 9): Promise<GalleryImage[]> {
+  const { data, error } = await supabase
+    .from('gallery')
+    .select('id, title, image_url, location')
+    .order('id', { ascending: false })
+    .limit(limit);
+
+  if (error) throw error;
+
+  return (data ?? []).map((img) => ({
+    id: img.id,
+    title: img.title ?? '',
+    imageUrl: img.image_url,
+    location: img.location ?? null,
+  }));
+}
+
+// ──────────────────────────────────────────────────────────
+// ── TESTIMONIAL SERVICE HANDLERS
+// ──────────────────────────────────────────────────────────
+
+export async function fetchTestimonials(limit = 12): Promise<Testimonial[]> {
+  const { data, error } = await supabase
+    .from('testimonials')
+    .select('id, name, review, rating, avatar_url, location')
+    .order('id', { ascending: false })
+    .limit(limit);
+
+  if (error) throw error;
+
+  return (data ?? []).map((t) => ({
+    id: t.id,
+    name: t.name ?? 'Anonymous',
+    review: t.review ?? '',
+    rating: t.rating ?? 5,
+    avatarUrl: t.avatar_url ?? null,
+    location: t.location ?? null,
+  }));
+}
+
+// ──────────────────────────────────────────────────────────
+// ── CONTENT MANAGEMENT ENGINE (BLOG ENGINE)
+// ──────────────────────────────────────────────────────────
+
+export async function fetchBlogPosts(limit = 3): Promise<BlogPost[]> {
+  const { data, error } = await supabase
+    .from('blog_posts')
+    .select('id, title, image_url, excerpt, category, read_time')
+    .order('id', { ascending: false })
+    .limit(limit);
+
+  if (error) throw error;
+
+  return (data ?? []).map((post) => ({
+    id: post.id,
+    title: post.title ?? '',
+    imageUrl: post.image_url ?? '',
+    excerpt: post.excerpt ?? null,
+    category: post.category ?? null,
+    readTime: post.read_time ?? null,
+  }));
+}
+
+// ──────────────────────────────────────────────────────────
+// ── UTILITIES
+// ──────────────────────────────────────────────────────────
+
+export function generateOrderNumber(): string {
+  const ts = Date.now().toString(36).toUpperCase();
+  const rand = Math.random().toString(36).slice(2, 6).toUpperCase();
+  return `TT-${ts}-${rand}`;
+}
+
+export async function fetchBlogPost(id: number): Promise<BlogPost | null> {
+  const { data, error } = await supabase
+    .from('blog_posts')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error) {
+    console.error("Error fetching blog post:", error);
+    return null;
+  }
+
+  return {
+    id: data.id,
+    title: data.title ?? '',
+    imageUrl: data.image_url ?? '',
+    excerpt: data.excerpt ?? null,
+    content: data.content ?? null,
+    author: data.author ?? null,
+    author_avatar: data.author_avatar ?? null,
+    category: data.category ?? null,
+    readTime: data.read_time ?? null,
+    published_at: data.published_at,
+  };
+}
+
+// ──────────────────────────────────────────────────────────
+// ── TRIPS DATA LAYER
+// ──────────────────────────────────────────────────────────
+
+export async function fetchTrips(userId: string): Promise<Trip[]> {
+  const { data, error } = await supabase
     .from('trips')
     .select('*')
     .eq('user_id', userId)
     .order('travel_date', { ascending: true });
-  if (status && status !== 'all') {
-    q = q.eq('status', status);
+
+  if (error) {
+    console.error("Error fetching trips:", error);
+    throw error;
   }
-  const { data, error } = await q;
-  if (error) throw error;
-  return (data ?? []).map(t => ({
-    id: t.id as number,
-    userId: t.user_id as string,
-    packageTitle: t.package_title as string | null,
-    destinationName: t.destination_name as string | null,
-    imageUrl: t.image_url as string | null,
-    status: t.status as string,
-    travelDate: t.travel_date as string,
-    returnDate: t.return_date as string | null,
-    travelers: t.travelers as number,
-    price: t.price as number,
-    isFavorite: t.is_favorite as boolean,
+
+  return (data ?? []).map((t) => ({
+    id: t.id,
+    user_id: t.user_id,
+    order_id: t.order_id ?? null,
+    package_id: t.package_id ?? null,
+    package_title: t.package_title ?? null,
+    destination_name: t.destination_name ?? null,
+    image_url: t.image_url ?? null,
+    status: t.status,
+    travel_date: t.travel_date,
+    return_date: t.return_date ?? null,
+    travelers: t.travelers ?? 1,
+    price: t.price ?? 0,
+    is_favorite: t.is_favorite ?? false,
+    created_at: t.created_at,
   }));
 }
 
-export async function fetchFavoriteTrips(userId: string) {
+export async function toggleFavoriteTrip(tripId: number, isFavorite: boolean): Promise<boolean> {
+  const { data, error } = await supabase
+    .from('trips')
+    .update({ is_favorite: isFavorite })
+    .eq('id', tripId)
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error updating trip favorite status:", error);
+    throw error;
+  }
+
+  return data.is_favorite;
+}
+
+export async function fetchFavoriteTrips(userId: string): Promise<Trip[]> {
   const { data, error } = await supabase
     .from('trips')
     .select('*')
     .eq('user_id', userId)
     .eq('is_favorite', true)
     .order('travel_date', { ascending: true });
-  if (error) throw error;
-  return (data ?? []).map(t => ({
-    id: t.id as number,
-    userId: t.user_id as string,
-    packageTitle: t.package_title as string | null,
-    destinationName: t.destination_name as string | null,
-    imageUrl: t.image_url as string | null,
-    status: t.status as string,
-    travelDate: t.travel_date as string,
-    returnDate: t.return_date as string | null,
-    travelers: t.travelers as number,
-    price: t.price as number,
-    isFavorite: t.is_favorite as boolean,
+
+  if (error) {
+    console.error("Error fetching favorite trips:", error);
+    throw error;
+  }
+
+  return (data ?? []).map((t) => ({
+    id: t.id,
+    user_id: t.user_id,
+    order_id: t.order_id ?? null,
+    package_id: t.package_id ?? null,
+    package_title: t.package_title ?? null,
+    destination_name: t.destination_name ?? null,
+    image_url: t.image_url ?? null,
+    status: t.status,
+    travel_date: t.travel_date,
+    return_date: t.return_date ?? null,
+    travelers: t.travelers ?? 1,
+    price: t.price ?? 0,
+    is_favorite: t.is_favorite ?? false,
+    created_at: t.created_at,
   }));
 }
 
-export async function toggleFavoriteTrip(tripId: number, isFavorite: boolean) {
-  const { error } = await supabase
-    .from('trips')
-    .update({ is_favorite: isFavorite })
-    .eq('id', tripId);
-  if (error) throw error;
-}
-
-// ── Transactions (from orders) ─────────────────────────────
-
-export async function fetchTransactions(userId: string) {
+export async function fetchTransactions(userId: string): Promise<Transaction[]> {
   const { data, error } = await supabase
-    .from('orders')
-    .select('*, order_items(*)')
+    .from('transactions')
+    .select('*')
     .eq('user_id', userId)
     .order('created_at', { ascending: false });
-  if (error) throw error;
-  return (data ?? []).map(o => ({
-    id: o.id as number,
-    packageTitle: ((o.order_items as { package_title?: string }[] | null)?.[0]?.package_title) ?? null,
-    amount: o.total_amount as number,
-    status: o.payment_status as string,
-    paymentMethod: o.payment_method as string | null,
-    createdAt: o.created_at as string,
+
+  if (error) {
+    console.error("Error fetching transactions:", error);
+    throw error;
+  }
+
+  return (data ?? []).map((tx) => ({
+    id: tx.id,
+    user_id: tx.user_id,
+    order_id: tx.order_id ?? null,
+    trip_id: tx.trip_id ?? null,
+    packageTitle: tx.package_title ?? 'Travel Package',
+    package_title: tx.package_title,
+    amount: tx.amount ?? 0,
+    status: tx.status,
+    paymentMethod: tx.payment_method ?? null,
+    payment_method: tx.payment_method,
+    payment_id: tx.payment_id ?? null,
+    createdAt: tx.created_at,
+    created_at: tx.created_at,
   }));
 }

@@ -30,7 +30,16 @@ export default function FavoriteTripsPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            {(trips ?? []).map(t => <TripCard key={t.id} trip={{ ...t, userId: user?.id ?? '' }} />)}
+            {(trips ?? []).map(t => (
+              <TripCard
+                key={t.id}
+                trip={{
+                  ...t,
+                  userId: user?.id ?? '',
+                  travelDate: t.travel_date ?? '',
+                }}
+              />
+            ))}
           </div>
         )}
       </div>

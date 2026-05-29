@@ -67,7 +67,7 @@ export function Header() {
             </a>
             <div className="flex items-center gap-1.5">
               <MapPin className="h-3.5 w-3.5 text-primary" />
-              <span>New York, USA</span>
+              <span>HALDWANI, INDIA</span>
             </div>
           </div>
           <div className="flex items-center gap-2 font-medium text-foreground animate-pulse">
