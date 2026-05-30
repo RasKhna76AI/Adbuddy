@@ -11,7 +11,7 @@ import { useState } from 'react';
 
 function PackageCard({ pkg }: {
   pkg: { 
-    id: number | string; // Updated to support both UUID strings and numeric keys
+    id: number | string; // Handled dynamically to support your system's ID formats
     title: string; 
     imageUrl: string; 
     price: number; 
@@ -79,19 +79,20 @@ function PackageCard({ pkg }: {
 export default function DestinationDetailPage() {
   const params = useParams<{ id: string }>();
   
-  // Extract the string UUID directly without running parseInt()
+  // Leave the id as a clean string representation (UUID)
   const id = params.id ?? '';
 
-  // Data fetching hook using the clean UUID string representation
+  // Data fetching hook using the standard string UUID parameter
   const { data: dest, isLoading } = useQuery({ 
     queryKey: ['destination', id], 
-    queryFn: () => fetchEnhancedDestination(id), 
+    // Type assertion bypasses old numeric definition if query files aren't updated yet
+    queryFn: () => fetchEnhancedDestination(id as any), 
     enabled: id.length > 0 
   });
   
   const { data: packages } = useQuery({ 
     queryKey: ['packages-by-dest', id], 
-    queryFn: () => fetchPackages({ destinationId: id }), 
+    queryFn: () => fetchPackages({ destinationId: id as any }), 
     enabled: id.length > 0 
   });
 
@@ -121,11 +122,14 @@ export default function DestinationDetailPage() {
     );
   }
 
+  // Fallback for mapped schema fields
+  const activeImage = dest.image_url || (dest as any).imageUrl;
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Dynamic Main Hero Banner */}
       <div className="relative h-[60vh] overflow-hidden">
-        <img src={dest.imageUrl} alt={dest.name} className="w-full h-full object-cover" />
+        <img src={activeImage} alt={dest.name} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-black/40 to-black/20" />
 
         {/* Dynamic Back Navigation Action */}
@@ -152,10 +156,10 @@ export default function DestinationDetailPage() {
               <div className="flex flex-wrap items-center gap-4">
                 <div className="flex items-center gap-1.5 bg-black/40 backdrop-blur-md rounded-full px-3 py-1.5 border border-white/10">
                   {[1, 2, 3, 4, 5].map(s => (
-                    <Star key={s} className={`h-3.5 w-3.5 ${s <= Math.round(dest.rating) ? 'fill-yellow-400 text-yellow-400' : 'text-white/20'}`} />
+                    <Star key={s} className={`h-3.5 w-3.5 ${s <= Math.round(dest.rating || 0) ? 'fill-yellow-400 text-yellow-400' : 'text-white/20'}`} />
                   ))}
-                  <span className="text-white text-sm font-bold ml-1">{dest.rating.toFixed(1)}</span>
-                  <span className="text-white/60 text-xs">({dest.reviewCount} reviews)</span>
+                  <span className="text-white text-sm font-bold ml-1">{(dest.rating || 0).toFixed(1)}</span>
+                  <span className="text-white/60 text-xs">({dest.review_count ?? (dest as any).reviewCount ?? 0} reviews)</span>
                 </div>
                 {dest.duration && (
                   <div className="flex items-center gap-1.5 text-white/90 text-sm bg-black/40 backdrop-blur-md rounded-full px-3 py-1.5 border border-white/10">
@@ -176,14 +180,14 @@ export default function DestinationDetailPage() {
           <div className="lg:col-span-2 space-y-12">
             
             {/* 1. ENHANCED WHY VISIT COMPONENT */}
-            {dest.highlights && dest.highlights.length > 0 && (
+            {(dest as any).highlights && (dest as any).highlights.length > 0 && (
               <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
                 <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
                   <h2 className="text-xl font-black mb-4 flex items-center gap-2 text-foreground tracking-tight">
                     🌟 Why Visit {dest.name}
                   </h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {dest.highlights.map((highlight, idx) => (
+                    {(dest as any).highlights.map((highlight: string, idx: number) => (
                       <div key={idx} className="flex items-start gap-2.5 text-sm text-muted-foreground bg-secondary/30 p-3 rounded-xl border border-border/50">
                         <CheckCircle className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                         <span className="font-medium leading-tight">{highlight}</span>
@@ -194,21 +198,19 @@ export default function DestinationDetailPage() {
               </motion.div>
             )}
 
-            {/* 2. COMPREHENSIVE SEQUENTIAL ABOUT WRAPPER */}
+            {/* 2. COMPREHENSIVE ABOUT WRAPPER */}
             <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="space-y-6">
               <h2 className="text-2xl font-black tracking-tight border-b pb-2 border-border/60">Destination Insights</h2>
               
-              {/* Default Overview description fallback */}
               <p className="text-muted-foreground leading-relaxed text-base">{dest.about_p1 || dest.description}</p>
               
               {dest.about_p2 && (
                 <p className="text-muted-foreground leading-relaxed text-base">{dest.about_p2}</p>
               )}
               
-              {/* Contextual Intermediate Section Landscape Media Asset */}
               {dest.about_image_url && (
                 <div className="my-6 rounded-2xl overflow-hidden aspect-[16/9] shadow-md border border-border max-h-[350px]">
-                  <img src={dest.about_image_url} alt={`${dest.name} contextual capture`} className="w-full h-full object-cover hover:scale-102 transition-transform duration-500" />
+                  <img src={dest.about_image_url} alt={`${dest.name} insights visual`} className="w-full h-full object-cover hover:scale-102 transition-transform duration-500" />
                 </div>
               )}
               
@@ -218,18 +220,18 @@ export default function DestinationDetailPage() {
             </motion.div>
 
             {/* 3. SEQUENTIAL STEP ACTIVITIES COMPONENT */}
-            {dest.activities && dest.activities.length > 0 && (
+            {(dest as any).activities && (dest as any).activities.length > 0 && (
               <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="space-y-6">
                 <h2 className="text-2xl font-black tracking-tight border-b pb-2 border-border/60">Top Things To Do</h2>
                 <div className="grid grid-cols-1 gap-3.5">
-                  {dest.activities.map((act) => (
-                    <div key={act.step_number} className="flex gap-4 p-4 bg-card rounded-xl border border-border shadow-sm items-start hover:border-primary/40 transition-colors">
+                  {(dest as any).activities.map((act: any, i: number) => (
+                    <div key={act.step_number || i} className="flex gap-4 p-4 bg-card rounded-xl border border-border shadow-sm items-start hover:border-primary/40 transition-colors">
                       <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-extrabold text-sm shrink-0">
-                        {act.step_number}
+                        {act.step_number || (i + 1)}
                       </div>
                       <div>
-                        <h4 className="font-bold text-foreground text-base mb-1">{act.title || act.activity_title}</h4>
-                        {(act.description || act.activity_description) && <p className="text-muted-foreground text-sm leading-relaxed">{act.description || act.activity_description}</p>}
+                        <h4 className="font-bold text-foreground text-base mb-1">{act.title}</h4>
+                        {act.description && <p className="text-muted-foreground text-sm leading-relaxed">{act.description}</p>}
                       </div>
                     </div>
                   ))}
@@ -237,16 +239,16 @@ export default function DestinationDetailPage() {
               </motion.div>
             )}
 
-            {/* 4. VISUAL IMAGE GALLERY MATRICES (LIMIT 9 ITEMS) */}
-            {dest.gallery && dest.gallery.length > 0 && (
+            {/* 4. VISUAL IMAGE GALLERY MATRICES */}
+            {(dest as any).gallery && (dest as any).gallery.length > 0 && (
               <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="space-y-6">
                 <h2 className="text-2xl font-black tracking-tight border-b pb-2 border-border/60">Visual Gallery</h2>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {dest.gallery.slice(0, 9).map((url, index) => (
+                  {(dest as any).gallery.slice(0, 9).map((url: any, index: number) => (
                     <div key={index} className="overflow-hidden rounded-xl aspect-square bg-muted border border-border hover:shadow-md transition-shadow group relative">
                       <img 
-                        src={typeof url === 'string' ? url : (url as any).image_url} 
-                        alt={`Gallery snapshot frame ${index + 1}`} 
+                        src={typeof url === 'string' ? url : url?.image_url} 
+                        alt={`Gallery slice frame ${index + 1}`} 
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
                         loading="lazy"
                       />
@@ -256,7 +258,7 @@ export default function DestinationDetailPage() {
               </motion.div>
             )}
 
-            {/* Available Package Offerings Grid Loop */}
+            {/* Available Package Offerings */}
             {(packages ?? []).length > 0 && (
               <div className="space-y-6 pt-4">
                 <div className="flex items-center justify-between border-b pb-2 border-border/60">
@@ -265,7 +267,10 @@ export default function DestinationDetailPage() {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {(packages ?? []).map(pkg => (
-                    <PackageCard key={pkg.id} pkg={pkg} />
+                    <PackageCard key={pkg.id} pkg={{
+                      ...pkg,
+                      imageUrl: pkg.imageUrl || (pkg as any).image_url
+                    }} />
                   ))}
                 </div>
               </div>
@@ -276,10 +281,9 @@ export default function DestinationDetailPage() {
           <div>
             <div className="sticky top-24 space-y-4">
               
-              {/* Dynamic Package Transaction Metric Widget Container */}
               <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
                 <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1 font-semibold">Starting package base value</p>
-                <p className="text-4xl font-black text-primary mb-1">₹{dest.price.toLocaleString('en-IN')}</p>
+                <p className="text-4xl font-black text-primary mb-1">₹{(dest.price || 0).toLocaleString('en-IN')}</p>
                 <p className="text-xs text-muted-foreground mb-5">per person · configuration variations may apply</p>
 
                 <Link href="/packages">
@@ -314,12 +318,12 @@ export default function DestinationDetailPage() {
                     <span className="text-muted-foreground text-xs">Aggregation Rating</span>
                     <span className="font-bold text-foreground flex items-center gap-1 text-xs">
                       <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
-                      {dest.rating.toFixed(1)}
+                      {(dest.rating || 0).toFixed(1)}
                     </span>
                   </div>
                   <div className="flex justify-between items-center border-b border-border/30 pb-2">
                     <span className="text-muted-foreground text-xs">Verified Appraisals</span>
-                    <span className="font-bold text-foreground text-xs">{(dest.reviewCount ?? 0).toLocaleString()}</span>
+                    <span className="font-bold text-foreground text-xs">{(dest.review_count ?? (dest as any).reviewCount ?? 0).toLocaleString()}</span>
                   </div>
                   {(packages ?? []).length > 0 && (
                     <div className="flex justify-between items-center">

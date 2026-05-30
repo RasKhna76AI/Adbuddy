@@ -46,6 +46,8 @@ export default function CheckoutPage() {
   const [step, setStep] = useState<'details' | 'payment' | 'success'>('details');
   const [completedOrder, setCompletedOrder] = useState<Order | null>(null);
   const [showReceipt, setShowReceipt] = useState(false);
+  const [transactionId, setTransactionId] = useState('');
+  
   const [form, setForm] = useState({
     name: user?.user_metadata?.full_name ?? '',
     email: user?.email ?? '',
@@ -71,17 +73,25 @@ export default function CheckoutPage() {
       currency: 'INR',
       name: 'Travel & Tours',
       description: `Booking ${orderNumber}`,
-      order_id: orderNumber,
       prefill: { name: form.name, email: form.email, contact: form.mobile },
       theme: { color: '#16a34a' },
       handler: async (response: Record<string, string>) => {
-        const { data } = await import('@/lib/supabase-db').then(m =>
-          m.updateOrderStatus(orderId, 'confirmed', response.razorpay_payment_id)
-        );
-        setCompletedOrder(data);
-        clearCart();
-        setStep('success');
+        try {
+          const { updateOrderStatus } = await import('@/lib/supabase-db');
+          const { data } = await updateOrderStatus(orderId, 'confirmed', response.razorpay_payment_id);
+          setCompletedOrder(data);
+          clearCart();
+          setStep('success');
+        } catch (err) {
+          console.error("Error updating razorpay confirmation order:", err);
+          alert('Payment succeeded but order status configuration failed. Please call support.');
+        }
       },
+      modal: {
+        ondismiss: function() {
+          setLoading(false);
+        }
+      }
     });
     rz.open();
   }
@@ -90,15 +100,16 @@ export default function CheckoutPage() {
     e.preventDefault();
     if (!user) { navigate('/login'); return; }
     setLoading(true);
+    
     try {
       const orderNumber = generateOrderNumber();
       const { data: order, error } = await createOrder({
         user_id: user.id,
         order_number: orderNumber,
         total_amount: total,
-        status: paymentMethod === 'bank_transfer' ? 'pending' : 'pending',
+        status: 'pending',
         payment_method: paymentMethod,
-        payment_id: null,
+        payment_id: paymentMethod === 'bank_transfer' && transactionId ? transactionId : null,
         payment_status: 'pending',
         traveler_name: form.name,
         traveler_email: form.email,
@@ -107,17 +118,17 @@ export default function CheckoutPage() {
         notes: form.notes || null,
       });
 
-      if (error || !order) throw new Error('Failed to create order');
+      if (error || !order) throw new Error('Failed to create order tracking asset structure.');
 
-      // Insert order items
+      // Insert order items safely
       const { supabaseDb } = await import('@/lib/supabase-db');
       await supabaseDb.from('order_items').insert(
         items.map(i => ({
           order_id: order.id,
           package_id: i.package.id,
           package_title: i.package.title,
-          destination: i.package.destinationName,
-          image_url: i.package.imageUrl,
+          destination: i.package.destinationName || '',
+          image_url: i.package.imageUrl || '',
           unit_price: i.package.price,
           travelers: i.travelers,
           total_price: i.package.price * i.travelers,
@@ -133,16 +144,18 @@ export default function CheckoutPage() {
       }
     } catch (err) {
       console.error(err);
-      alert('Something went wrong. Please try again.');
+      alert('Something went wrong. Please check fields or try again.');
     } finally {
-      setLoading(false);
+      if (paymentMethod !== 'razorpay') {
+        setLoading(false);
+      }
     }
   }
 
   if (items.length === 0 && step !== 'success') {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="text-center max-w-sm mx-auto">
           <ShoppingCart className="h-14 w-14 text-muted-foreground/30 mx-auto mb-4" />
           <h2 className="text-xl font-bold mb-2">Your cart is empty</h2>
           <p className="text-muted-foreground mb-6">Add some packages to proceed to checkout</p>
@@ -154,26 +167,28 @@ export default function CheckoutPage() {
 
   if (step === 'success' && completedOrder) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-md w-full text-center bg-card border border-border rounded-2xl p-8 shadow-lg">
+      <div className="min-h-screen flex items-center justify-center p-4 bg-secondary/10">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-md w-full text-center bg-card border border-border rounded-2xl p-8 shadow-lg mx-auto">
           <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
             <Check className="h-8 w-8 text-primary" />
           </div>
-          <h2 className="text-2xl font-bold text-foreground mb-2">Booking Confirmed!</h2>
-          <p className="text-muted-foreground mb-2">Order #{completedOrder.order_number}</p>
+          <h2 className="text-2xl font-bold text-foreground mb-2">Booking Logged!</h2>
+          <p className="text-muted-foreground mb-4">Order #{completedOrder.order_number}</p>
+          
           {paymentMethod === 'bank_transfer' && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 text-left mb-4">
-              <p className="font-semibold text-yellow-800 text-sm mb-2">Complete Bank Transfer</p>
-              <div className="text-xs text-yellow-700 space-y-1">
-                <p><strong>Bank:</strong> {BANK_DETAILS.bankName}</p>
-                <p><strong>Account:</strong> {BANK_DETAILS.accountName}</p>
-                <p><strong>Account No:</strong> {BANK_DETAILS.accountNumber}</p>
-                <p><strong>IFSC:</strong> {BANK_DETAILS.ifscCode}</p>
-                <p><strong>Amount:</strong> ₹{completedOrder.total_amount.toLocaleString()}</p>
-                <p className="text-yellow-600 mt-2">Reference your order number <strong>{completedOrder.order_number}</strong> in the transfer</p>
-              </div>
+            <div className="bg-amber-500/5 border border-amber-500/20 rounded-xl p-4 text-left mb-5">
+              <p className="font-bold text-amber-600 text-xs mb-1 uppercase tracking-wide">Manual Processing Required</p>
+              <p className="text-xs text-muted-foreground leading-normal mb-3">
+                Our verification team is auditing your transaction records. Your trip status will unlock automatically once validation completes.
+              </p>
+              {transactionId && (
+                <div className="text-[11px] bg-muted/60 px-2.5 py-1.5 rounded border border-border/40 font-mono text-foreground">
+                  <strong>Reference ID:</strong> {transactionId}
+                </div>
+              )}
             </div>
           )}
+          
           <div className="flex gap-3 justify-center">
             <Button variant="outline" className="rounded-full" onClick={() => setShowReceipt(true)}>View Receipt</Button>
             <Link href="/dashboard"><Button className="rounded-full">My Orders</Button></Link>
@@ -185,22 +200,26 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-secondary/20">
-      <div className="container py-10 max-w-5xl">
-        <Link href="/packages" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm mb-6">
-          <ArrowLeft className="h-4 w-4" /> Back to Packages
-        </Link>
-        <h1 className="text-2xl font-bold text-foreground mb-8">Checkout</h1>
+    <div className="min-h-screen bg-secondary/10 flex items-start justify-center">
+      <div className="container py-10 max-w-4xl mx-auto px-4">
+        <div className="flex justify-center mb-4">
+          <Link href="/packages" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm">
+            <ArrowLeft className="h-4 w-4" /> Back to Packages
+          </Link>
+        </div>
+        
+        <h1 className="text-3xl font-black text-center text-foreground mb-10 tracking-tight">Complete Booking Registration</h1>
 
         <form onSubmit={handleSubmit}>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+            {/* Left Rail Inputs panel container */}
             <div className="lg:col-span-2 space-y-6">
+              
               {/* Traveler details */}
-              <div className="bg-card border border-border rounded-2xl p-6">
-                <h2 className="font-bold text-foreground mb-5 flex items-center gap-2">
+              <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+                <h2 className="font-bold text-foreground text-base mb-5 flex items-center gap-2 tracking-tight">
                   <span className="w-6 h-6 bg-primary text-primary-foreground rounded-full text-xs flex items-center justify-center font-bold">1</span>
-                  Traveler Details
+                  Primary Traveler Details
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
@@ -212,7 +231,7 @@ export default function CheckoutPage() {
                     <Input type="email" value={form.email} onChange={e => set('email', e.target.value)} required className="rounded-xl" placeholder="you@example.com" />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Mobile *</Label>
+                    <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Mobile Number *</Label>
                     <Input type="tel" value={form.mobile} onChange={e => set('mobile', e.target.value)} required className="rounded-xl" placeholder="+91 98765 43210" />
                   </div>
                   <div className="space-y-1.5">
@@ -221,55 +240,74 @@ export default function CheckoutPage() {
                   </div>
                   <div className="sm:col-span-2 space-y-1.5">
                     <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Special Requests</Label>
-                    <Textarea value={form.notes} onChange={e => set('notes', e.target.value)} className="rounded-xl resize-none" rows={3} placeholder="Dietary needs, accessibility, special occasions..." />
+                    <Textarea value={form.notes} onChange={e => set('notes', e.target.value)} className="rounded-xl resize-none" rows={3} placeholder="Dietary adjustments, accessibility layout arrangements, extra beds..." />
                   </div>
                 </div>
               </div>
 
-              {/* Payment Method */}
-              <div className="bg-card border border-border rounded-2xl p-6">
-                <h2 className="font-bold text-foreground mb-5 flex items-center gap-2">
+              {/* Payment Method Selector block */}
+              <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+                <h2 className="font-bold text-foreground text-base mb-5 flex items-center gap-2 tracking-tight">
                   <span className="w-6 h-6 bg-primary text-primary-foreground rounded-full text-xs flex items-center justify-center font-bold">2</span>
-                  Payment Method
+                  Select Payment Method
                 </h2>
                 <div className="space-y-3">
                   <button type="button" onClick={() => setPaymentMethod('razorpay')}
-                    className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left ${paymentMethod === 'razorpay' ? 'border-primary bg-primary/5' : 'border-border hover:border-border/80'}`}>
+                    className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left ${paymentMethod === 'razorpay' ? 'border-primary bg-primary/5' : 'border-border hover:border-border/85'}`}>
                     <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'razorpay' ? 'border-primary' : 'border-muted-foreground'}`}>
                       {paymentMethod === 'razorpay' && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
                     </div>
                     <CreditCard className="h-5 w-5 text-primary" />
                     <div>
-                      <p className="font-semibold text-sm text-foreground">Pay with Razorpay</p>
-                      <p className="text-xs text-muted-foreground">Credit/Debit card, UPI, Net Banking, Wallets</p>
+                      <p className="font-bold text-sm text-foreground">Pay safely with Razorpay</p>
+                      <p className="text-xs text-muted-foreground">Instant validation · Cards, UPI, Netbanking channels</p>
                     </div>
-                    <span className="ml-auto text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-semibold">Recommended</span>
+                    <span className="ml-auto text-xs bg-primary/10 text-primary px-2.5 py-0.5 rounded-full font-bold">Fastest Unlock</span>
                   </button>
 
                   <button type="button" onClick={() => setPaymentMethod('bank_transfer')}
-                    className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left ${paymentMethod === 'bank_transfer' ? 'border-primary bg-primary/5' : 'border-border hover:border-border/80'}`}>
+                    className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left ${paymentMethod === 'bank_transfer' ? 'border-primary bg-primary/5' : 'border-border hover:border-border/85'}`}>
                     <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'bank_transfer' ? 'border-primary' : 'border-muted-foreground'}`}>
                       {paymentMethod === 'bank_transfer' && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
                     </div>
                     <Building2 className="h-5 w-5 text-muted-foreground" />
                     <div>
-                      <p className="font-semibold text-sm text-foreground">Bank Transfer</p>
-                      <p className="text-xs text-muted-foreground">Direct deposit — booking confirmed after transfer</p>
+                      <p className="font-bold text-sm text-foreground">Direct Bank Transfer</p>
+                      <p className="text-xs text-muted-foreground">IMPS/NEFT routing — Requires transaction ID match confirmation</p>
                     </div>
                   </button>
 
                   <AnimatePresence>
                     {paymentMethod === 'bank_transfer' && (
                       <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-                        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm space-y-1.5">
-                          <p className="font-semibold text-blue-900 mb-2">Bank Transfer Details</p>
-                          {Object.entries({ 'Bank Name': BANK_DETAILS.bankName, 'Account Name': BANK_DETAILS.accountName, 'Account Number': BANK_DETAILS.accountNumber, 'IFSC Code': BANK_DETAILS.ifscCode, 'Branch': BANK_DETAILS.branch, 'SWIFT Code': BANK_DETAILS.swiftCode }).map(([k, v]) => (
-                            <div key={k} className="flex justify-between">
-                              <span className="text-blue-700 text-xs">{k}</span>
-                              <span className="text-blue-900 font-semibold text-xs">{v}</span>
-                            </div>
-                          ))}
-                          <p className="text-blue-600 text-xs mt-2 pt-2 border-t border-blue-200">⚠ Include your name and email as reference when transferring</p>
+                        <div className="bg-muted/50 border border-border rounded-xl p-4 space-y-4 mt-1">
+                          <div className="bg-blue-500/5 border border-blue-500/20 text-xs rounded-lg p-3 space-y-1.5 text-foreground">
+                            <p className="font-bold text-blue-600 mb-1">Official Deposit Target Account</p>
+                            {Object.entries({ 'Bank Name': BANK_DETAILS.bankName, 'Account Title': BANK_DETAILS.accountName, 'Account No.': BANK_DETAILS.accountNumber, 'IFSC Route Code': BANK_DETAILS.ifscCode, 'Branch': BANK_DETAILS.branch }).map(([k, v]) => (
+                              <div key={k} className="flex justify-between items-center text-[11px]">
+                                <span className="text-muted-foreground">{k}</span>
+                                <span className="font-mono font-bold">{v}</span>
+                              </div>
+                            ))}
+                          </div>
+                          
+                          {/* Transaction verification block ID input */}
+                          <div className="space-y-1.5 bg-card p-3 border border-border rounded-lg">
+                            <Label className="text-xs font-bold text-foreground flex items-center gap-1">
+                              Transaction Reference / UTR Number <span className="text-destructive">*</span>
+                            </Label>
+                            <Input 
+                              type="text" 
+                              required={paymentMethod === 'bank_transfer'} 
+                              value={transactionId} 
+                              onChange={e => setTransactionId(e.target.value)} 
+                              placeholder="e.g. TXN1234567890 or UTR Number" 
+                              className="rounded-lg font-mono text-xs bg-background" 
+                            />
+                            <p className="text-[10px] text-muted-foreground leading-normal">
+                              Paste your transfer slip receipt UTR code to instantly match validation metrics with bank statements.
+                            </p>
+                          </div>
                         </div>
                       </motion.div>
                     )}
@@ -278,44 +316,52 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            {/* Order Summary */}
-            <div>
-              <div className="bg-card border border-border rounded-2xl p-6 sticky top-24">
-                <h2 className="font-bold text-foreground mb-5">Order Summary</h2>
-                <div className="space-y-3 mb-5">
+            {/* Right Sticky Total Block panel */}
+            <div className="sticky top-24">
+              <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+                <h2 className="font-bold text-foreground text-base mb-4 tracking-tight">Order Summary</h2>
+                <div className="space-y-3 mb-5 max-h-[220px] overflow-y-auto pr-1">
                   {items.map(item => (
-                    <div key={item.package.id} className="flex gap-3">
-                      <img src={item.package.imageUrl} alt={item.package.title} className="w-14 h-14 rounded-xl object-cover shrink-0" />
+                    <div key={item.package.id} className="flex gap-3 items-center border-b border-border/30 pb-2 last:border-0 last:pb-0">
+                      <img src={item.package.imageUrl} alt={item.package.title} className="w-12 h-12 rounded-lg object-cover shrink-0" />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-foreground leading-tight truncate">{item.package.title}</p>
-                        <p className="text-xs text-muted-foreground">{item.travelers} traveler{item.travelers > 1 ? 's' : ''} · {item.package.duration}</p>
-                        <p className="text-sm font-bold text-primary">${(item.package.price * item.travelers).toLocaleString()}</p>
+                        <p className="text-xs font-bold text-foreground leading-tight truncate">{item.package.title}</p>
+                        <p className="text-[11px] text-muted-foreground">{item.travelers} Pax · {item.package.duration}</p>
+                        <p className="text-xs font-bold text-primary mt-0.5">₹{(item.package.price * item.travelers).toLocaleString('en-IN')}</p>
                       </div>
                     </div>
                   ))}
                 </div>
+                
                 <div className="border-t border-border pt-4 space-y-2 mb-5">
-                  <div className="flex justify-between text-sm">
+                  <div className="flex justify-between text-xs">
                     <span className="text-muted-foreground">Subtotal</span>
-                    <span>${total.toLocaleString()}</span>
+                    <span className="font-medium text-foreground">₹{total.toLocaleString('en-IN')}</span>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Taxes & Fees</span>
-                    <span className="text-green-600">Included</span>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-muted-foreground">Convenience Surcharge</span>
+                    <span className="text-green-600 font-bold">Waived</span>
                   </div>
-                  <div className="flex justify-between font-bold text-lg pt-2 border-t border-border">
-                    <span>Total</span>
-                    <span className="text-primary">${total.toLocaleString()}</span>
+                  <div className="flex justify-between font-black text-base pt-2.5 border-t border-dashed">
+                    <span>Grand Total</span>
+                    <span className="text-primary">₹{total.toLocaleString('en-IN')}</span>
                   </div>
                 </div>
-                <Button type="submit" className="w-full rounded-full h-12 font-semibold" disabled={loading || !form.name || !form.email || !form.mobile}>
-                  {loading ? 'Processing...' : paymentMethod === 'razorpay' ? 'Pay Now' : 'Confirm Booking'}
+
+                <Button 
+                  type="submit" 
+                  className="w-full rounded-full h-12 font-bold tracking-wide" 
+                  disabled={loading || !form.name || !form.email || !form.mobile || (paymentMethod === 'bank_transfer' && !transactionId)}
+                >
+                  {loading ? 'Processing Transaction...' : paymentMethod === 'razorpay' ? 'Secure Pay Now' : 'Submit Bank Booking'}
                 </Button>
-                <div className="flex items-center justify-center gap-1.5 mt-4 text-xs text-muted-foreground">
-                  <Shield className="h-3.5 w-3.5" /> 100% Secure & Encrypted
+                
+                <div className="flex items-center justify-center gap-1.5 mt-4 text-[11px] text-muted-foreground">
+                  <Shield className="h-3.5 w-3.5 text-primary" /> 256-bit Secure Gateway Safeguard
                 </div>
               </div>
             </div>
+
           </div>
         </form>
       </div>
