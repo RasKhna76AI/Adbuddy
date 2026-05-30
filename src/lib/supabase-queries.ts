@@ -272,6 +272,78 @@ export interface CancelHistory {
   cancelled_at: string;
 }
 
+export interface EnhancedDestination {
+  id: number;
+  name: string;
+  country: string;
+  description: string | null;
+  imageUrl: string;
+  rating: number;
+  reviewCount: number;
+  price: number;
+  duration: string | null;
+  featured: boolean;
+  category: string | null;
+  about_p1: string | null;
+  about_p2: string | null;
+  about_p3: string | null;
+  about_image_url: string | null;
+  highlights: string[];
+  activities: { step_number: number; title: string; description: string | null }[];
+  gallery: string[];
+}
+
+// Replace or add this specific detail retrieval function
+export async function fetchEnhancedDestination(id: number): Promise<EnhancedDestination | null> {
+  const { data, error } = await supabase
+    .from('destinations')
+    .select(`
+      *,
+      destination_highlights(highlight),
+      destination_activities(step_number, activity_title, activity_description),
+      destination_gallery(image_url)
+    `)
+    .eq('id', id)
+    .single();
+
+  if (error) {
+    console.error("Error fetching detailed destination data:", error);
+    return null;
+  }
+
+  return {
+    id: data.id,
+    name: data.name,
+    country: data.country,
+    description: data.description,
+    imageUrl: data.image_url,
+    rating: data.rating ?? 0,
+    reviewCount: data.review_count ?? 0,
+    price: data.price ?? 0,
+    duration: data.duration,
+    featured: data.featured,
+    category: data.category,
+    
+    // Parsed relational properties
+    about_p1: data.about_p1 ?? null,
+    about_p2: data.about_p2 ?? null,
+    about_p3: data.about_p3 ?? null,
+    about_image_url: data.about_image_url ?? null,
+    
+    highlights: (data.destination_highlights ?? []).map((h: any) => h.highlight),
+    
+    activities: (data.destination_activities ?? [])
+      .sort((a: any, b: any) => a.step_number - b.step_number)
+      .map((act: any) => ({
+        step_number: act.step_number,
+        title: act.activity_title,
+        description: act.activity_description
+      })),
+      
+    gallery: (data.destination_gallery ?? []).map((g: any) => g.image_url)
+  };
+}
+
 // ──────────────────────────────────────────────────────────
 // ── USER PROFILE & IDENTIFICATION
 // ──────────────────────────────────────────────────────────

@@ -1,23 +1,25 @@
 import { useParams, Link } from 'wouter';
-import { Star, MapPin, Clock, ArrowLeft, Users, ShoppingCart, Check, Globe, Camera, Utensils, Shield } from 'lucide-react';
+import { Star, MapPin, Clock, ArrowLeft, ShoppingCart, Check, Globe, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useQuery } from '@tanstack/react-query';
-import { fetchDestination, fetchPackages } from '@/lib/supabase-queries';
+import { fetchEnhancedDestination, fetchPackages } from '@/lib/supabase-queries'; 
 import { useCart } from '@/contexts/CartContext';
 import { useState } from 'react';
 
-const HIGHLIGHTS = [
-  { icon: Globe, label: 'World-class views', color: 'bg-blue-50 text-blue-600' },
-  { icon: Camera, label: 'Photography spots', color: 'bg-purple-50 text-purple-600' },
-  { icon: Utensils, label: 'Local cuisine', color: 'bg-orange-50 text-orange-600' },
-  { icon: Shield, label: 'Safe & guided', color: 'bg-green-50 text-green-600' },
-];
-
 function PackageCard({ pkg }: {
-  pkg: { id: number; title: string; imageUrl: string; price: number; originalPrice?: number | null; duration: string; rating?: number | null; destinationName?: string | null };
+  pkg: { 
+    id: number | string; // Updated to support both UUID strings and numeric keys
+    title: string; 
+    imageUrl: string; 
+    price: number; 
+    originalPrice?: number | null; 
+    duration: string; 
+    rating?: number | null; 
+    destinationName?: string | null; 
+  };
 }) {
   const { addItem, isInCart } = useCart();
   const [added, setAdded] = useState(false);
@@ -25,7 +27,15 @@ function PackageCard({ pkg }: {
 
   function handleCart(e: React.MouseEvent) {
     e.preventDefault();
-    addItem({ id: pkg.id, title: pkg.title, destinationName: pkg.destinationName ?? null, imageUrl: pkg.imageUrl, price: pkg.price, duration: pkg.duration, rating: pkg.rating ?? null });
+    addItem({ 
+      id: pkg.id, 
+      title: pkg.title, 
+      destinationName: pkg.destinationName ?? null, 
+      imageUrl: pkg.imageUrl, 
+      price: pkg.price, 
+      duration: pkg.duration, 
+      rating: pkg.rating ?? null 
+    });
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
   }
@@ -54,8 +64,8 @@ function PackageCard({ pkg }: {
         </div>
         <div className="flex items-center justify-between">
           <div>
-            {pkg.originalPrice && <p className="text-xs text-muted-foreground line-through">${pkg.originalPrice.toLocaleString()}</p>}
-            <p className="font-bold text-primary">${pkg.price.toLocaleString()}<span className="text-xs text-muted-foreground font-normal">/person</span></p>
+            {pkg.originalPrice && <p className="text-xs text-muted-foreground line-through">₹{pkg.originalPrice.toLocaleString('en-IN')}</p>}
+            <p className="font-bold text-primary">₹{pkg.price.toLocaleString('en-IN')}<span className="text-xs text-muted-foreground font-normal">/person</span></p>
           </div>
           <Link href={`/packages/${pkg.id}`}>
             <Button size="sm" className="rounded-full text-xs">Book Now</Button>
@@ -68,16 +78,28 @@ function PackageCard({ pkg }: {
 
 export default function DestinationDetailPage() {
   const params = useParams<{ id: string }>();
-  const id = parseInt(params.id ?? '0', 10);
+  
+  // Extract the string UUID directly without running parseInt()
+  const id = params.id ?? '';
 
-  const { data: dest, isLoading } = useQuery({ queryKey: ['destination', id], queryFn: () => fetchDestination(id), enabled: !!id });
-  const { data: packages } = useQuery({ queryKey: ['packages-by-dest', id], queryFn: () => fetchPackages({ destinationId: id }), enabled: !!id });
+  // Data fetching hook using the clean UUID string representation
+  const { data: dest, isLoading } = useQuery({ 
+    queryKey: ['destination', id], 
+    queryFn: () => fetchEnhancedDestination(id), 
+    enabled: id.length > 0 
+  });
+  
+  const { data: packages } = useQuery({ 
+    queryKey: ['packages-by-dest', id], 
+    queryFn: () => fetchPackages({ destinationId: id }), 
+    enabled: id.length > 0 
+  });
 
   if (isLoading) {
     return (
-      <div className="min-h-screen">
+      <div className="min-h-screen bg-background">
         <Skeleton className="h-[60vh] w-full" />
-        <div className="container py-12 space-y-4">
+        <div className="container py-12 space-y-4 px-4">
           <Skeleton className="h-8 w-64" />
           <Skeleton className="h-4 w-full max-w-xl" />
           <Skeleton className="h-4 w-2/3" />
@@ -88,7 +110,7 @@ export default function DestinationDetailPage() {
 
   if (!dest) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <Globe className="h-16 w-16 text-muted-foreground/20 mx-auto mb-4" />
           <p className="font-medium text-foreground mb-1">Destination not found</p>
@@ -100,51 +122,45 @@ export default function DestinationDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Hero */}
-      <div className="relative h-[65vh] overflow-hidden">
+    <div className="min-h-screen bg-background text-foreground">
+      {/* Dynamic Main Hero Banner */}
+      <div className="relative h-[60vh] overflow-hidden">
         <img src={dest.imageUrl} alt={dest.name} className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-black/40 to-black/20" />
 
-        {/* Back link */}
-        <div className="absolute top-6 left-0 right-0">
-          <div className="container">
-            <Link href="/destinations" className="inline-flex items-center gap-2 text-white/80 hover:text-white text-sm font-medium transition-colors bg-black/20 backdrop-blur-sm rounded-full px-4 py-2" data-testid="link-back">
+        {/* Dynamic Back Navigation Action */}
+        <div className="absolute top-6 left-0 right-0 z-10">
+          <div className="container px-4">
+            <Link href="/destinations" className="inline-flex items-center gap-2 text-white/80 hover:text-white text-sm font-medium transition-colors bg-black/40 backdrop-blur-md rounded-full px-4 py-2" data-testid="link-back">
               <ArrowLeft className="h-4 w-4" /> All Destinations
             </Link>
           </div>
         </div>
 
-        {/* Hero content */}
-        <div className="absolute bottom-0 left-0 right-0 pb-10">
-          <div className="container">
+        {/* Hero Meta Metrics Elements */}
+        <div className="absolute bottom-0 left-0 right-0 pb-10 z-10">
+          <div className="container px-4">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-              <div className="flex items-center gap-2 text-white/70 mb-2 text-sm">
+              <div className="flex items-center gap-2 text-white/90 mb-2 text-sm">
                 <MapPin className="h-4 w-4 text-primary" />
-                <span>{dest.country}</span>
-                {dest.featured && (
-                  <Badge className="bg-primary text-primary-foreground border-none text-xs ml-2">Featured</Badge>
+                <span className="font-medium">{dest.country}</span>
+                {dest.category && (
+                  <Badge className="bg-primary text-primary-foreground border-none text-xs ml-2 uppercase font-bold tracking-wider">{dest.category}</Badge>
                 )}
               </div>
               <h1 className="text-4xl md:text-6xl font-black text-white mb-4 tracking-tight">{dest.name}</h1>
-              <div className="flex flex-wrap items-center gap-5">
-                <div className="flex items-center gap-1.5 bg-black/30 backdrop-blur-sm rounded-full px-3 py-1.5">
-                  {[1,2,3,4,5].map(s => (
-                    <Star key={s} className={`h-4 w-4 ${s <= Math.round(dest.rating) ? 'fill-yellow-400 text-yellow-400' : 'text-white/30'}`} />
+              <div className="flex flex-wrap items-center gap-4">
+                <div className="flex items-center gap-1.5 bg-black/40 backdrop-blur-md rounded-full px-3 py-1.5 border border-white/10">
+                  {[1, 2, 3, 4, 5].map(s => (
+                    <Star key={s} className={`h-3.5 w-3.5 ${s <= Math.round(dest.rating) ? 'fill-yellow-400 text-yellow-400' : 'text-white/20'}`} />
                   ))}
-                  <span className="text-white/80 text-sm ml-1">{dest.rating.toFixed(1)}</span>
-                  <span className="text-white/50 text-sm">({dest.reviewCount} reviews)</span>
+                  <span className="text-white text-sm font-bold ml-1">{dest.rating.toFixed(1)}</span>
+                  <span className="text-white/60 text-xs">({dest.reviewCount} reviews)</span>
                 </div>
                 {dest.duration && (
-                  <div className="flex items-center gap-1.5 text-white/80 text-sm bg-black/30 backdrop-blur-sm rounded-full px-3 py-1.5">
-                    <Clock className="h-4 w-4" />
-                    <span>{dest.duration}</span>
-                  </div>
-                )}
-                {(packages ?? []).length > 0 && (
-                  <div className="flex items-center gap-1.5 text-white/80 text-sm bg-black/30 backdrop-blur-sm rounded-full px-3 py-1.5">
-                    <Users className="h-4 w-4" />
-                    <span>{(packages ?? []).length} package{(packages ?? []).length !== 1 ? 's' : ''}</span>
+                  <div className="flex items-center gap-1.5 text-white/90 text-sm bg-black/40 backdrop-blur-md rounded-full px-3 py-1.5 border border-white/10">
+                    <Clock className="h-4 w-4 text-primary" />
+                    <span className="font-medium">{dest.duration}</span>
                   </div>
                 )}
               </div>
@@ -153,116 +169,181 @@ export default function DestinationDetailPage() {
         </div>
       </div>
 
-      <div className="container py-12">
+      <div className="container py-12 px-4">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-          {/* Main content */}
-          <div className="lg:col-span-2 space-y-10">
-            {/* Highlights */}
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-              <h2 className="text-xl font-bold text-foreground mb-4">Why Visit {dest.name}</h2>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {HIGHLIGHTS.map(({ icon: Icon, label, color }) => (
-                  <div key={label} className={`rounded-2xl p-4 flex flex-col items-center gap-2 text-center ${color}`}>
-                    <Icon className="h-6 w-6" />
-                    <span className="text-xs font-semibold">{label}</span>
+          
+          {/* Main Context Left Rail Panel Container */}
+          <div className="lg:col-span-2 space-y-12">
+            
+            {/* 1. ENHANCED WHY VISIT COMPONENT */}
+            {dest.highlights && dest.highlights.length > 0 && (
+              <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+                <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+                  <h2 className="text-xl font-black mb-4 flex items-center gap-2 text-foreground tracking-tight">
+                    🌟 Why Visit {dest.name}
+                  </h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {dest.highlights.map((highlight, idx) => (
+                      <div key={idx} className="flex items-start gap-2.5 text-sm text-muted-foreground bg-secondary/30 p-3 rounded-xl border border-border/50">
+                        <CheckCircle className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                        <span className="font-medium leading-tight">{highlight}</span>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </motion.div>
-
-            {/* About */}
-            {dest.description && (
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-                <h2 className="text-xl font-bold text-foreground mb-3">About {dest.name}</h2>
-                <p className="text-muted-foreground leading-relaxed text-base">{dest.description}</p>
+                </div>
               </motion.div>
             )}
 
-            {/* Packages */}
+            {/* 2. COMPREHENSIVE SEQUENTIAL ABOUT WRAPPER */}
+            <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="space-y-6">
+              <h2 className="text-2xl font-black tracking-tight border-b pb-2 border-border/60">Destination Insights</h2>
+              
+              {/* Default Overview description fallback */}
+              <p className="text-muted-foreground leading-relaxed text-base">{dest.about_p1 || dest.description}</p>
+              
+              {dest.about_p2 && (
+                <p className="text-muted-foreground leading-relaxed text-base">{dest.about_p2}</p>
+              )}
+              
+              {/* Contextual Intermediate Section Landscape Media Asset */}
+              {dest.about_image_url && (
+                <div className="my-6 rounded-2xl overflow-hidden aspect-[16/9] shadow-md border border-border max-h-[350px]">
+                  <img src={dest.about_image_url} alt={`${dest.name} contextual capture`} className="w-full h-full object-cover hover:scale-102 transition-transform duration-500" />
+                </div>
+              )}
+              
+              {dest.about_p3 && (
+                <p className="text-muted-foreground leading-relaxed text-base">{dest.about_p3}</p>
+              )}
+            </motion.div>
+
+            {/* 3. SEQUENTIAL STEP ACTIVITIES COMPONENT */}
+            {dest.activities && dest.activities.length > 0 && (
+              <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="space-y-6">
+                <h2 className="text-2xl font-black tracking-tight border-b pb-2 border-border/60">Top Things To Do</h2>
+                <div className="grid grid-cols-1 gap-3.5">
+                  {dest.activities.map((act) => (
+                    <div key={act.step_number} className="flex gap-4 p-4 bg-card rounded-xl border border-border shadow-sm items-start hover:border-primary/40 transition-colors">
+                      <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-extrabold text-sm shrink-0">
+                        {act.step_number}
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-foreground text-base mb-1">{act.title || act.activity_title}</h4>
+                        {(act.description || act.activity_description) && <p className="text-muted-foreground text-sm leading-relaxed">{act.description || act.activity_description}</p>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {/* 4. VISUAL IMAGE GALLERY MATRICES (LIMIT 9 ITEMS) */}
+            {dest.gallery && dest.gallery.length > 0 && (
+              <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="space-y-6">
+                <h2 className="text-2xl font-black tracking-tight border-b pb-2 border-border/60">Visual Gallery</h2>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {dest.gallery.slice(0, 9).map((url, index) => (
+                    <div key={index} className="overflow-hidden rounded-xl aspect-square bg-muted border border-border hover:shadow-md transition-shadow group relative">
+                      <img 
+                        src={typeof url === 'string' ? url : (url as any).image_url} 
+                        alt={`Gallery snapshot frame ${index + 1}`} 
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+                        loading="lazy"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {/* Available Package Offerings Grid Loop */}
             {(packages ?? []).length > 0 && (
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-                <div className="flex items-center justify-between mb-5">
-                  <h2 className="text-xl font-bold text-foreground">Available Packages</h2>
-                  <Badge variant="secondary" className="rounded-full">{(packages ?? []).length} packages</Badge>
+              <div className="space-y-6 pt-4">
+                <div className="flex items-center justify-between border-b pb-2 border-border/60">
+                  <h2 className="text-2xl font-black tracking-tight">Available Packages</h2>
+                  <Badge variant="secondary" className="rounded-full font-bold">{(packages ?? []).length} option{(packages ?? []).length !== 1 ? 's' : ''}</Badge>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {(packages ?? []).map(pkg => (
                     <PackageCard key={pkg.id} pkg={pkg} />
                   ))}
                 </div>
-              </motion.div>
+              </div>
             )}
           </div>
 
-          {/* Sidebar */}
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}>
+          {/* Right Action & Metadata Sidebar Panel Column */}
+          <div>
             <div className="sticky top-24 space-y-4">
-              {/* Pricing card */}
+              
+              {/* Dynamic Package Transaction Metric Widget Container */}
               <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
-                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Starting from</p>
-                <p className="text-4xl font-black text-primary mb-1">${dest.price.toLocaleString()}</p>
-                <p className="text-xs text-muted-foreground mb-5">per person · prices vary by package</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1 font-semibold">Starting package base value</p>
+                <p className="text-4xl font-black text-primary mb-1">₹{dest.price.toLocaleString('en-IN')}</p>
+                <p className="text-xs text-muted-foreground mb-5">per person · configuration variations may apply</p>
 
                 <Link href="/packages">
-                  <Button className="w-full rounded-full mb-3 h-12 text-base font-bold" data-testid="button-book-now">
-                    Browse All Packages
+                  <Button className="w-full rounded-full mb-3 h-12 text-base font-black tracking-wide shadow-md shadow-primary/10" data-testid="button-book-now">
+                    Browse All Outings
                   </Button>
                 </Link>
                 {(packages ?? []).length > 0 && (
                   <Link href={`/packages/${(packages ?? [])[0].id}`}>
-                    <Button variant="outline" className="w-full rounded-full">
-                      View Best Package
+                    <Button variant="outline" className="w-full rounded-full font-semibold">
+                      View Highlight Package
                     </Button>
                   </Link>
                 )}
               </div>
 
-              {/* Info card */}
-              <div className="bg-secondary/50 rounded-2xl p-5 space-y-3">
-                <h3 className="font-bold text-sm text-foreground">Quick Info</h3>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Country</span>
-                    <span className="font-semibold text-foreground">{dest.country}</span>
+              {/* Sidebar Snapshot Quick Attributes Widget */}
+              <div className="bg-secondary/40 rounded-2xl p-5 space-y-3.5 border border-border/50">
+                <h3 className="font-bold text-sm text-foreground uppercase tracking-wider text-[11px] text-muted-foreground">Location Blueprint</h3>
+                <div className="space-y-2.5 text-sm">
+                  <div className="flex justify-between items-center border-b border-border/30 pb-2">
+                    <span className="text-muted-foreground text-xs">Region Target</span>
+                    <span className="font-bold text-foreground text-xs">{dest.country}</span>
                   </div>
                   {dest.duration && (
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Duration</span>
-                      <span className="font-semibold text-foreground">{dest.duration}</span>
+                    <div className="flex justify-between items-center border-b border-border/30 pb-2">
+                      <span className="text-muted-foreground text-xs">Recommended Stay</span>
+                      <span className="font-bold text-foreground text-xs">{dest.duration}</span>
                     </div>
                   )}
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Rating</span>
-                    <span className="font-semibold text-foreground flex items-center gap-1">
+                  <div className="flex justify-between items-center border-b border-border/30 pb-2">
+                    <span className="text-muted-foreground text-xs">Aggregation Rating</span>
+                    <span className="font-bold text-foreground flex items-center gap-1 text-xs">
                       <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
                       {dest.rating.toFixed(1)}
                     </span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Reviews</span>
-                    <span className="font-semibold text-foreground">{(dest.reviewCount ?? 0).toLocaleString()}</span>
+                  <div className="flex justify-between items-center border-b border-border/30 pb-2">
+                    <span className="text-muted-foreground text-xs">Verified Appraisals</span>
+                    <span className="font-bold text-foreground text-xs">{(dest.reviewCount ?? 0).toLocaleString()}</span>
                   </div>
                   {(packages ?? []).length > 0 && (
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Packages</span>
-                      <span className="font-semibold text-foreground">{(packages ?? []).length} available</span>
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground text-xs">Active Curations</span>
+                      <span className="font-bold text-foreground text-xs">{(packages ?? []).length} tours tracking</span>
                     </div>
                   )}
                 </div>
               </div>
 
-              {/* Need help */}
+              {/* Expert Advisory Help Block */}
               <div className="bg-primary/5 border border-primary/20 rounded-2xl p-5 text-center">
-                <p className="text-sm font-semibold text-foreground mb-1">Need help planning?</p>
-                <p className="text-xs text-muted-foreground mb-3">Our travel experts are here to help you</p>
+                <p className="text-sm font-bold text-foreground mb-1">Tailor Your Itinerary?</p>
+                <p className="text-xs text-muted-foreground mb-3 leading-normal">Our regional planning agents are online to construct your specific custom journey.</p>
                 <Link href="/packages">
-                  <Button size="sm" variant="outline" className="rounded-full w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground">
+                  <Button size="sm" variant="outline" className="rounded-full w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground font-semibold">
                     Get Expert Advice
                   </Button>
                 </Link>
               </div>
+
             </div>
-          </motion.div>
+          </div>
+
         </div>
       </div>
     </div>

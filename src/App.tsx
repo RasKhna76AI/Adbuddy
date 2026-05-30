@@ -30,6 +30,7 @@ import OrdersPage from "@/pages/dashboard/orders";
 import CancelHistoryPage from "@/pages/dashboard/cancel-history";
 import CheckoutPage from "@/pages/checkout";
 import OffersPage from "@/pages/offers";
+import ContactPage from "@/pages/ContactPage";
 
 const queryClient = new QueryClient();
 
@@ -76,6 +77,7 @@ function Router() {
       <Route path="/dashboard/tx-history" component={() => <AppShell><ProtectedRoute component={TxHistoryPage} /></AppShell>} />
       <Route path="/dashboard/reset-password" component={() => <AppShell><ProtectedRoute component={DashboardResetPasswordPage} /></AppShell>} />
       <Route path="/dashboard/cancel-history" component={() => <AppShell><ProtectedRoute component={CancelHistoryPage} /></AppShell>} />
+      <Route path="/contact" component={() => <AppShell><ContactPage /></AppShell>} />
       <Route component={NotFound} />
     </Switch>
   );

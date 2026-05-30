@@ -30,8 +30,8 @@ function loadRazorpay(): Promise<boolean> {
 
 const BANK_DETAILS = {
   bankName: 'HDFC Bank',
-  accountName: 'Travel & Tours Pvt Ltd',
-  accountNumber: '50100123456789',
+  accountName: 'Adventure Buddy',
+  accountNumber: '12345678910112',
   ifscCode: 'HDFC0001234',
   branch: 'Main Branch, Mumbai',
   swiftCode: 'HDFCINBB',

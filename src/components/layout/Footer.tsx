@@ -9,7 +9,7 @@ export function Footer() {
           <div className="lg:col-span-1">
             <Link href="/" className="flex items-center gap-2 mb-5">
               <Compass className="h-6 w-6 text-primary" />
-              <span className="text-xl font-bold text-white">TRAVEL</span>
+              <span className="text-xl font-bold text-white">AdventureBuddy</span>
             </Link>
             <p className="text-sm text-slate-400 leading-relaxed mb-6">
               Discover extraordinary destinations worldwide with your most trusted travel companion.
@@ -45,9 +45,17 @@ export function Footer() {
           <div>
             <h4 className="font-bold text-white mb-5">Support</h4>
             <ul className="space-y-3 text-sm">
-              {['FAQ', 'Contact Us', 'Privacy Policy', 'Terms of Service', 'Cookie Policy'].map(item => (
-                <li key={item}>
-                  <a href="#" className="text-slate-400 hover:text-primary transition-colors">{item}</a>
+              {[
+                { href: '/contact', label: 'Contact Us' },
+                { href: '/faq', label: 'FAQ' },
+                { href: '/privacy', label: 'Privacy Policy' },
+                { href: '/terms', label: 'Terms of Service' },
+                { href: '/cookies', label: 'Cookie Policy' },
+              ].map(item => (
+                <li key={item.href}>
+                  <Link href={item.href} className="text-slate-400 hover:text-primary transition-colors">
+                    {item.label}
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -56,9 +64,18 @@ export function Footer() {
           <div>
             <h4 className="font-bold text-white mb-5">Contact</h4>
             <ul className="space-y-3 text-sm text-slate-400">
-              <li className="flex items-center gap-2.5"><MapPin className="h-4 w-4 text-primary shrink-0" />123 Adventure Lane, Travel City</li>
-              <li className="flex items-center gap-2.5"><Mail className="h-4 w-4 text-primary shrink-0" />hello@travelco.com</li>
-              <li className="flex items-center gap-2.5"><Phone className="h-4 w-4 text-primary shrink-0" />+1 (555) 123-4567</li>
+              <li className="flex items-start gap-2.5">
+                <MapPin className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                <span>102 Cyber Heights, Sector 62,<br />Noida, Uttar Pradesh, India</span>
+              </li>
+              <li className="flex items-center gap-2.5">
+                <Mail className="h-4 w-4 text-primary shrink-0" />
+                <a href="mailto:support@adventurebuddy.com" className="hover:text-primary transition-colors">support@adventurebuddy.com</a>
+              </li>
+              <li className="flex items-center gap-2.5">
+                <Phone className="h-4 w-4 text-primary shrink-0" />
+                <a href="tel:+911204567890" className="hover:text-primary transition-colors">+91 (120) 456-7890</a>
+              </li>
             </ul>
 
             <h4 className="font-bold text-white mt-7 mb-4">Newsletter</h4>
@@ -74,7 +91,7 @@ export function Footer() {
 
       <div className="border-t border-slate-800">
         <div className="container py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-slate-500">
-          <p>&copy; {new Date().getFullYear()} TRAVEL. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} AdventureBuddy. All rights reserved.</p>
           <p>Made with ❤️ for explorers everywhere</p>
         </div>
       </div>
