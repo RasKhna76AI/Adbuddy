@@ -1,0 +1,475 @@
+-- ============================================================
+-- TOUR & TRAVEL - SUPABASE DATABASE SCHEMA
+-- Run these SQL statements in your Supabase SQL Editor
+-- to set up all tables with Row Level Security (RLS).
+-- ============================================================
+
+-- ────────────────────────────────────────────────────────────
+-- 1. DESTINATIONS
+-- ────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS destinations (
+  id          SERIAL PRIMARY KEY,
+  name        TEXT NOT NULL,
+  country     TEXT NOT NULL,
+  description TEXT,
+  image_url   TEXT NOT NULL,
+  rating      REAL NOT NULL DEFAULT 4.5,
+  review_count INTEGER NOT NULL DEFAULT 0,
+  price       REAL NOT NULL,
+  duration    TEXT,
+  featured    BOOLEAN NOT NULL DEFAULT FALSE,
+  category    TEXT,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- ────────────────────────────────────────────────────────────
+-- 2. PACKAGES
+-- ────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS packages (
+  id               SERIAL PRIMARY KEY,
+  title            TEXT NOT NULL,
+  destination_id   INTEGER NOT NULL REFERENCES destinations(id) ON DELETE CASCADE,
+  destination_name TEXT,
+  description      TEXT,
+  image_url        TEXT NOT NULL,
+  price            REAL NOT NULL,
+  original_price   REAL,
+  duration         TEXT NOT NULL,
+  group_size       INTEGER,
+  rating           REAL NOT NULL DEFAULT 4.5,
+  review_count     INTEGER NOT NULL DEFAULT 0,
+  featured         BOOLEAN NOT NULL DEFAULT FALSE,
+  includes         TEXT,
+  created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- ────────────────────────────────────────────────────────────
+-- 3. GALLERY
+-- ────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS gallery (
+  id        SERIAL PRIMARY KEY,
+  image_url TEXT NOT NULL,
+  title     TEXT NOT NULL,
+  location  TEXT,
+  category  TEXT
+);
+
+-- ────────────────────────────────────────────────────────────
+-- 4. BLOG POSTS
+-- ────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS blog_posts (
+  id            SERIAL PRIMARY KEY,
+  title         TEXT NOT NULL,
+  excerpt       TEXT,
+  content       TEXT,
+  image_url     TEXT NOT NULL,
+  author        TEXT,
+  author_avatar TEXT,
+  category      TEXT,
+  read_time     TEXT,
+  published_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- ────────────────────────────────────────────────────────────
+-- 5. TESTIMONIALS
+-- ────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS testimonials (
+  id               SERIAL PRIMARY KEY,
+  name             TEXT NOT NULL,
+  avatar_url       TEXT,
+  location         TEXT,
+  review           TEXT NOT NULL,
+  rating           REAL NOT NULL DEFAULT 5,
+  trip_destination TEXT
+);
+
+-- ────────────────────────────────────────────────────────────
+-- 6. USER PROFILES  (extended Supabase auth data)
+-- ────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS user_profiles (
+  id         UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  full_name  TEXT,
+  email      TEXT,
+  mobile     TEXT,
+  avatar_url TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users can view their own profile"
+  ON user_profiles FOR SELECT USING (auth.uid() = id);
+CREATE POLICY "Users can update their own profile"
+  ON user_profiles FOR UPDATE USING (auth.uid() = id);
+CREATE POLICY "Users can insert their own profile"
+  ON user_profiles FOR INSERT WITH CHECK (auth.uid() = id);
+
+-- ────────────────────────────────────────────────────────────
+-- 7. USER ADDRESSES  (max 5 per user)
+-- ────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS user_addresses (
+  id           SERIAL PRIMARY KEY,
+  user_id      UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  label        TEXT NOT NULL DEFAULT 'Home',
+  address_line TEXT NOT NULL,
+  city         TEXT NOT NULL,
+  state        TEXT,
+  country      TEXT NOT NULL,
+  pincode      TEXT,
+  is_default   BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE user_addresses ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users can manage their own addresses"
+  ON user_addresses FOR ALL USING (auth.uid() = user_id);
+
+-- ────────────────────────────────────────────────────────────
+-- 8. CART ITEMS
+-- ────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS cart_items (
+  id         SERIAL PRIMARY KEY,
+  user_id    UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  package_id INTEGER NOT NULL REFERENCES packages(id) ON DELETE CASCADE,
+  quantity   INTEGER NOT NULL DEFAULT 1,
+  travelers  INTEGER NOT NULL DEFAULT 1,
+  added_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE cart_items ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users can manage their own cart"
+  ON cart_items FOR ALL USING (auth.uid() = user_id);
+
+-- ────────────────────────────────────────────────────────────
+-- 9. ORDERS
+-- ────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS orders (
+  id               SERIAL PRIMARY KEY,
+  user_id          UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  order_number     TEXT NOT NULL UNIQUE,
+  total_amount     REAL NOT NULL,
+  status           TEXT NOT NULL DEFAULT 'pending',   -- pending | confirmed | cancelled | refunded
+  payment_method   TEXT,                              -- razorpay | bank_transfer
+  payment_id       TEXT,
+  payment_status   TEXT NOT NULL DEFAULT 'pending',   -- pending | paid | failed | refunded
+  traveler_name    TEXT,
+  traveler_email   TEXT,
+  traveler_mobile  TEXT,
+  travel_date      DATE,
+  notes            TEXT,
+  created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users can view their own orders"
+  ON orders FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can insert their own orders"
+  ON orders FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update their own orders"
+  ON orders FOR UPDATE USING (auth.uid() = user_id);
+
+-- ────────────────────────────────────────────────────────────
+-- 10. ORDER ITEMS
+-- ────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS order_items (
+  id              SERIAL PRIMARY KEY,
+  order_id        INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+  package_id      INTEGER REFERENCES packages(id) ON DELETE SET NULL,
+  package_title   TEXT NOT NULL,
+  destination     TEXT,
+  image_url       TEXT,
+  unit_price      REAL NOT NULL,
+  travelers       INTEGER NOT NULL DEFAULT 1,
+  total_price     REAL NOT NULL
+);
+
+ALTER TABLE order_items ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users can view order items for their orders"
+  ON order_items FOR SELECT
+  USING (order_id IN (SELECT id FROM orders WHERE user_id = auth.uid()));
+CREATE POLICY "Users can insert order items for their orders"
+  ON order_items FOR INSERT
+  WITH CHECK (order_id IN (SELECT id FROM orders WHERE user_id = auth.uid()));
+
+-- ────────────────────────────────────────────────────────────
+-- 11. TRIPS  (booked journeys)
+-- ────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS trips (
+  id               SERIAL PRIMARY KEY,
+  user_id          UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  order_id         INTEGER REFERENCES orders(id) ON DELETE SET NULL,
+  package_id       INTEGER REFERENCES packages(id) ON DELETE SET NULL,
+  package_title    TEXT,
+  destination_name TEXT,
+  image_url        TEXT,
+  status           TEXT NOT NULL DEFAULT 'upcoming',  -- upcoming | ongoing | past | cancelled
+  travel_date      TEXT NOT NULL,
+  return_date      TEXT,
+  travelers        INTEGER NOT NULL DEFAULT 1,
+  price            REAL NOT NULL,
+  is_favorite      BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE trips ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users can manage their own trips"
+  ON trips FOR ALL USING (auth.uid() = user_id);
+
+-- ────────────────────────────────────────────────────────────
+-- 12. CANCEL HISTORY
+-- ────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS cancel_history (
+  id              SERIAL PRIMARY KEY,
+  user_id         UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  order_id        INTEGER REFERENCES orders(id) ON DELETE SET NULL,
+  order_number    TEXT,
+  package_title   TEXT,
+  destination     TEXT,
+  original_amount REAL,
+  refund_amount   REAL,
+  refund_status   TEXT DEFAULT 'processing',   -- processing | completed | rejected
+  reason          TEXT,
+  cancelled_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE cancel_history ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users can view their own cancel history"
+  ON cancel_history FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can insert their own cancel history"
+  ON cancel_history FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+-- ────────────────────────────────────────────────────────────
+-- 13. REVIEWS
+-- ────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS reviews (
+  id          SERIAL PRIMARY KEY,
+  package_id  INTEGER NOT NULL REFERENCES packages(id) ON DELETE CASCADE,
+  user_id     UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  user_name   TEXT NOT NULL,
+  avatar_url  TEXT,
+  rating      REAL NOT NULL CHECK (rating >= 1 AND rating <= 5),
+  title       TEXT,
+  comment     TEXT NOT NULL,
+  likes_count INTEGER NOT NULL DEFAULT 0,
+  verified    BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE reviews ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Anyone can read reviews"
+  ON reviews FOR SELECT USING (TRUE);
+CREATE POLICY "Authenticated users can insert reviews"
+  ON reviews FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update their own reviews"
+  ON reviews FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "Users can delete their own reviews"
+  ON reviews FOR DELETE USING (auth.uid() = user_id);
+
+-- ────────────────────────────────────────────────────────────
+-- 14. REVIEW LIKES
+-- ────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS review_likes (
+  review_id  INTEGER NOT NULL REFERENCES reviews(id) ON DELETE CASCADE,
+  user_id    UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (review_id, user_id)
+);
+
+ALTER TABLE review_likes ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users can manage their own likes"
+  ON review_likes FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "Anyone can read likes"
+  ON review_likes FOR SELECT USING (TRUE);
+
+-- ────────────────────────────────────────────────────────────
+-- 15. REVIEW COMMENTS
+-- ────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS review_comments (
+  id          SERIAL PRIMARY KEY,
+  review_id   INTEGER NOT NULL REFERENCES reviews(id) ON DELETE CASCADE,
+  user_id     UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  user_name   TEXT NOT NULL,
+  avatar_url  TEXT,
+  comment     TEXT NOT NULL,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE review_comments ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Anyone can read review comments"
+  ON review_comments FOR SELECT USING (TRUE);
+CREATE POLICY "Authenticated users can insert comments"
+  ON review_comments FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can delete their own comments"
+  ON review_comments FOR DELETE USING (auth.uid() = user_id);
+
+-- ────────────────────────────────────────────────────────────
+-- 16. NOTIFICATIONS
+-- ────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS notifications (
+  id         SERIAL PRIMARY KEY,
+  user_id    UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  title      TEXT NOT NULL,
+  message    TEXT NOT NULL,
+  type       TEXT NOT NULL DEFAULT 'info',   -- info | success | warning | error | booking | offer
+  read       BOOLEAN NOT NULL DEFAULT FALSE,
+  action_url TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users can manage their own notifications"
+  ON notifications FOR ALL USING (auth.uid() = user_id);
+
+-- ────────────────────────────────────────────────────────────
+-- 17. OFFERS
+-- ────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS offers (
+  id               SERIAL PRIMARY KEY,
+  title            TEXT NOT NULL,
+  description      TEXT,
+  image_url        TEXT,
+  discount_percent INTEGER,
+  discount_amount  REAL,
+  coupon_code      TEXT,
+  package_id       INTEGER REFERENCES packages(id) ON DELETE SET NULL,
+  destination_id   INTEGER REFERENCES destinations(id) ON DELETE SET NULL,
+  valid_from       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  valid_until      TIMESTAMPTZ,
+  active           BOOLEAN NOT NULL DEFAULT TRUE,
+  badge            TEXT,
+  created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Anyone can read active offers (no RLS needed for public data)
+-- But you can enable RLS and allow public SELECT if needed:
+-- ALTER TABLE offers ENABLE ROW LEVEL SECURITY;
+-- CREATE POLICY "Anyone can read active offers" ON offers FOR SELECT USING (active = TRUE);
+
+-- ────────────────────────────────────────────────────────────
+-- 18. BOOKING INQUIRIES  (hero form)
+-- ────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS booking_inquiries (
+  id               SERIAL PRIMARY KEY,
+  name             TEXT NOT NULL,
+  email            TEXT NOT NULL,
+  mobile           TEXT NOT NULL,
+  destination      TEXT,
+  travel_date      DATE,
+  return_date      DATE,
+  travelers        INTEGER NOT NULL DEFAULT 1,
+  traveler_type    TEXT,          -- solo | couple | family | group
+  budget           TEXT,
+  accommodation    TEXT,          -- budget | standard | luxury
+  interests        TEXT[],
+  special_requests TEXT,
+  user_id          UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  status           TEXT NOT NULL DEFAULT 'pending',  -- pending | contacted | closed
+  created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE booking_inquiries ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Anyone can insert booking inquiries"
+  ON booking_inquiries FOR INSERT WITH CHECK (TRUE);
+CREATE POLICY "Users can view their own inquiries"
+  ON booking_inquiries FOR SELECT USING (auth.uid() = user_id OR user_id IS NULL);
+
+-- ────────────────────────────────────────────────────────────
+-- 19. TRANSACTIONS  (payment records)
+-- ────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS transactions (
+  id             SERIAL PRIMARY KEY,
+  user_id        UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  order_id       INTEGER REFERENCES orders(id) ON DELETE SET NULL,
+  trip_id        INTEGER REFERENCES trips(id) ON DELETE SET NULL,
+  package_title  TEXT,
+  amount         REAL NOT NULL,
+  status         TEXT NOT NULL DEFAULT 'completed',  -- completed | pending | failed | refunded
+  payment_method TEXT,
+  payment_id     TEXT,
+  created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users can view their own transactions"
+  ON transactions FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can insert their own transactions"
+  ON transactions FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+-- ────────────────────────────────────────────────────────────
+-- SAMPLE OFFERS DATA  (run after packages are inserted)
+-- ────────────────────────────────────────────────────────────
+-- INSERT INTO offers (title, description, image_url, discount_percent, coupon_code, valid_until, badge) VALUES
+-- ('Early Bird Special', 'Book 60 days in advance and save 30%', 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=800&q=80', 30, 'EARLY30', NOW() + INTERVAL '90 days', 'HOT'),
+-- ('Couple''s Retreat', 'Special discounts on romantic packages for two', 'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=800&q=80', 20, 'COUPLE20', NOW() + INTERVAL '60 days', 'NEW'),
+-- ('Group Explorer', 'Groups of 6+ get exclusive rates', 'https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?w=800&q=80', 25, 'GROUP25', NOW() + INTERVAL '120 days', 'SALE'),
+-- ('Weekend Getaway', 'Flat 15% off all short-trip packages', 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800&q=80', 15, 'WEEKEND15', NOW() + INTERVAL '30 days', NULL);
+
+-- ────────────────────────────────────────────────────────────
+-- USEFUL INDEXES
+-- ────────────────────────────────────────────────────────────
+CREATE INDEX IF NOT EXISTS idx_packages_destination_id ON packages(destination_id);
+CREATE INDEX IF NOT EXISTS idx_reviews_package_id ON reviews(package_id);
+CREATE INDEX IF NOT EXISTS idx_orders_user_id ON orders(user_id);
+CREATE INDEX IF NOT EXISTS idx_trips_user_id ON trips(user_id);
+CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON notifications(user_id);
+CREATE INDEX IF NOT EXISTS idx_cart_items_user_id ON cart_items(user_id);
+
+-- ────────────────────────────────────────────────────────────
+-- AUTO-UPDATE updated_at TRIGGER
+-- ────────────────────────────────────────────────────────────
+CREATE OR REPLACE FUNCTION update_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_orders_updated_at
+  BEFORE UPDATE ON orders
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+CREATE TRIGGER trg_user_profiles_updated_at
+  BEFORE UPDATE ON user_profiles
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+-- ────────────────────────────────────────────────────────────
+-- AUTO-CREATE USER PROFILE ON SIGNUP
+-- ────────────────────────────────────────────────────────────
+CREATE OR REPLACE FUNCTION handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.user_profiles (id, full_name, email)
+  VALUES (
+    NEW.id,
+    NEW.raw_user_meta_data->>'full_name',
+    NEW.email
+  ) ON CONFLICT (id) DO NOTHING;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION handle_new_user();
+
+-- ────────────────────────────────────────────────────────────
+-- FUNCTION: update review likes count
+-- ────────────────────────────────────────────────────────────
+CREATE OR REPLACE FUNCTION update_review_likes_count()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF TG_OP = 'INSERT' THEN
+    UPDATE reviews SET likes_count = likes_count + 1 WHERE id = NEW.review_id;
+  ELSIF TG_OP = 'DELETE' THEN
+    UPDATE reviews SET likes_count = GREATEST(likes_count - 1, 0) WHERE id = OLD.review_id;
+  END IF;
+  RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_review_likes_count
+  AFTER INSERT OR DELETE ON review_likes
+  FOR EACH ROW EXECUTE FUNCTION update_review_likes_count();
