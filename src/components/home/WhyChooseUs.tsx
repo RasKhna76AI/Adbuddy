@@ -1,26 +1,26 @@
 import { motion } from 'framer-motion';
-import { Shield, Headphones, Globe, Award } from 'lucide-react';
+import { Compass, ShieldCheck,Clock, Users } from 'lucide-react';
 
 const reasons = [
   {
-    icon: Globe,
-    title: 'Global Coverage',
-    description: 'Access to over 500 destinations across 80 countries worldwide with curated local experiences.',
+    icon: Compass,
+    title: 'Local Destination Experts',
+    description: 'Deep root network across Uttarakhand, from hidden trails in Chopta to spiritual circuits in Char Dham.',
   },
   {
-    icon: Shield,
-    title: 'Safe Travel',
-    description: 'Your safety is our priority. All our packages include comprehensive travel insurance coverage.',
+    icon: ShieldCheck,
+    title: 'Verified Safe Travel',
+    description: '100% verified mountain-trained drivers, clean certified vehicles, and strictly audited safe stays.',
   },
   {
-    icon: Headphones,
-    title: '24/7 Support',
-    description: 'Round-the-clock customer support available in multiple languages for any assistance you need.',
+    icon: Clock,
+    title: '24/7 Regional Assistance',
+    description: 'Round-the-clock emergency support to safely handle mountain weather changes and road updates.',
   },
   {
-    icon: Award,
-    title: 'Best Price Guarantee',
-    description: 'We guarantee the best prices on all our packages. Find it cheaper, and we will match it.',
+    icon: Users,
+    title: 'Community Trusted Value',
+    description: 'Over 12+ years of trusted experience managing family, institutional, school, and corporate groups.',
   },
 ];
 

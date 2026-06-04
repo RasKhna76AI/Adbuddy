@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
 import { LoginModal } from '@/components/auth/LoginModal';
 import { CartDrawer } from '@/components/cart/CartDrawer';
+import NotificationsPanel from '@/components/layout/NotificationsPanel';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -12,15 +13,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  Menu, X, LayoutDashboard, ShoppingBag, Calendar, XCircle,
-  KeyRound, LogOut, User, ShoppingCart, Tag, ChevronDown,
-  Phone, Mail, MapPin
-} from 'lucide-react';
+import { Compass, Menu, X, LayoutDashboard, ShoppingBag, Calendar, Circle as XCircle, KeyRound, LogOut, User, ShoppingCart, Tag, ChevronDown } from 'lucide-react';
 
 const navLinks = [
   { href: '/', label: 'Home' },
-  { href: '/services', label: 'Services' },
+  {
+    label: 'Services',
+    submenu: [
+      { href: '/services/solo-travel', label: 'Solo Travel' },
+      { href: '/services/family-group', label: 'Family Group' },
+      { href: '/services/school-group', label: 'School Tours' },
+      { href: '/services/college-group', label: 'College Adventures' },
+      { href: '/services/corporate', label: 'Corporate Retreats' },
+    ]
+  },
   { href: '/destinations', label: 'Destinations' },
   { href: '/packages', label: 'Packages' },
   { href: '/gallery', label: 'Gallery' },
@@ -54,53 +60,52 @@ export function Header() {
 
   return (
     <>
-      {/* Business Info Bar */}
-      <div className="bg-muted text-muted-foreground border-b border-border/60 text-xs py-2 px-4 hidden md:block">
-        <div className="container flex items-center justify-between mx-auto">
-          <div className="flex items-center gap-6">
-            <a href="tel:+1234567890" className="flex items-center gap-1.5 hover:text-foreground transition-colors">
-              <Phone className="h-3.5 w-3.5 text-primary" />
-              <span>+1 (234) 567-890</span>
-            </a>
-            <a href="mailto:support@adventurebuddy.com" className="flex items-center gap-1.5 hover:text-foreground transition-colors">
-              <Mail className="h-3.5 w-3.5 text-primary" />
-              <span>support@adventurebuddy.com</span>
-            </a>
-            <div className="flex items-center gap-1.5">
-              <MapPin className="h-3.5 w-3.5 text-primary" />
-              <span>HALDWANI, INDIA</span>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 font-medium text-foreground animate-pulse">
-            <Tag className="h-3.5 w-3.5 text-primary" />
-            <span>Get 10% off on your first booking! Use code: <span className="text-primary font-bold">ADVENTURE10</span></span>
-          </div>
-        </div>
-      </div>
-
       <header className={`sticky top-0 z-50 w-full transition-all duration-300 ${scrolled ? 'bg-background/95 backdrop-blur-md border-b border-border shadow-sm' : 'bg-background/80 backdrop-blur-sm border-b border-border/50'}`}>
         <div className="container flex h-16 items-center justify-between">
-          
-          {/* Logo Brand Section */}
-          <Link href="/" className="flex items-center gap-2.5">
-            <img 
-              src="/logo.png" 
-              alt="AdventureBuddy Logo" 
-              className="h-8 w-auto object-contain" 
-            />
-            <span className="text-xl font-bold tracking-tight">AdventureBuddy</span>
+          <Link href="/" className="flex items-center gap-2">
+            <Compass className="h-6 w-6 text-primary" />
+            <span className="text-xl font-bold tracking-tight">TRAVEL</span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-1">
-            {navLinks.map((link) => (
-              <Link key={link.href} href={link.href}
-                className={`px-4 py-2 text-sm font-medium rounded-full transition-colors ${location === link.href ? 'text-primary bg-primary/10' : 'text-foreground/70 hover:text-foreground hover:bg-secondary'}`}>
-                {link.label}
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              const isSubmenu = 'submenu' in link;
+
+              if (isSubmenu) {
+                return (
+                  <DropdownMenu key={link.label}>
+                    <DropdownMenuTrigger asChild>
+                      <button className={`px-4 py-2 text-sm font-medium rounded-full transition-colors flex items-center gap-1 text-foreground/70 hover:text-foreground hover:bg-secondary`}>
+                        {link.label}
+                        <ChevronDown className="h-4 w-4" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start">
+                      {link.submenu?.map((item) => (
+                        <Link key={item.href} href={item.href}>
+                          <DropdownMenuItem className="cursor-pointer">
+                            {item.label}
+                          </DropdownMenuItem>
+                        </Link>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                );
+              }
+
+              return (
+                <Link key={link.href} href={link.href}
+                  className={`px-4 py-2 text-sm font-medium rounded-full transition-colors ${location === link.href ? 'text-primary bg-primary/10' : 'text-foreground/70 hover:text-foreground hover:bg-secondary'}`}>
+                  {link.label}
+                </Link>
+              );
+            })}
           </nav>
 
           <div className="flex items-center gap-2">
+            {/* Notifications */}
+            <NotificationsPanel />
+
             {/* Cart */}
             <button onClick={() => setCartOpen(true)} className="relative p-2 rounded-full hover:bg-secondary transition-colors" aria-label="Cart">
               <ShoppingCart className="h-5 w-5 text-foreground/70" />

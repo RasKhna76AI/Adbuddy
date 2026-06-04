@@ -6,6 +6,7 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import CookieConsentModal from "@/components/layout/CookieConsentModal";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import LoginPage from "@/pages/login";
@@ -19,6 +20,16 @@ import PackageDetailPage from "@/pages/package-detail";
 import GalleryPage from "@/pages/gallery";
 import BlogPage from "@/pages/blog";
 import BlogDetailPage from "@/pages/blog-detail";
+import FAQPage from "@/pages/faq";
+import ContactUsPage from "@/pages/ContactPage";
+import PrivacyPolicyPage from "@/pages/privacy-policy";
+import TermsOfServicePage from "@/pages/terms-of-service";
+import CookiePolicyPage from "@/pages/cookie-policy";
+import SoloTravelPage from "@/pages/services/solo-travel";
+import FamilyGroupPage from "@/pages/services/family-group";
+import SchoolGroupPage from "@/pages/services/school-group";
+import CollegeGroupPage from "@/pages/services/college-group";
+import CorporatePage from "@/pages/services/corporate";
 import DashboardPage from "@/pages/dashboard/index";
 import UpcomingTripsPage from "@/pages/dashboard/upcoming-trips";
 import PastTripsPage from "@/pages/dashboard/past-trips";
@@ -30,7 +41,6 @@ import OrdersPage from "@/pages/dashboard/orders";
 import CancelHistoryPage from "@/pages/dashboard/cancel-history";
 import CheckoutPage from "@/pages/checkout";
 import OffersPage from "@/pages/offers";
-import ServicesPage from "@/pages/services";
 
 const queryClient = new QueryClient();
 
@@ -62,7 +72,16 @@ function Router() {
       <Route path="/gallery" component={() => <AppShell><GalleryPage /></AppShell>} />
       <Route path="/blog" component={() => <AppShell><BlogPage /></AppShell>} />
       <Route path="/blog/:id" component={() => <AppShell><BlogDetailPage /></AppShell>} />
-      <Route path="/services" component={() => <AppShell><ServicesPage /></AppShell>} />
+      <Route path="/faq" component={() => <AppShell><FAQPage /></AppShell>} />
+      <Route path="/contact-us" component={() => <AppShell><ContactUsPage /></AppShell>} />
+      <Route path="/privacy-policy" component={() => <AppShell><PrivacyPolicyPage /></AppShell>} />
+      <Route path="/terms-of-service" component={() => <AppShell><TermsOfServicePage /></AppShell>} />
+      <Route path="/cookie-policy" component={() => <AppShell><CookiePolicyPage /></AppShell>} />
+      <Route path="/services/solo-travel" component={() => <AppShell><SoloTravelPage /></AppShell>} />
+      <Route path="/services/family-group" component={() => <AppShell><FamilyGroupPage /></AppShell>} />
+      <Route path="/services/school-group" component={() => <AppShell><SchoolGroupPage /></AppShell>} />
+      <Route path="/services/college-group" component={() => <AppShell><CollegeGroupPage /></AppShell>} />
+      <Route path="/services/corporate" component={() => <AppShell><CorporatePage /></AppShell>} />
       <Route path="/offers" component={() => <AppShell><OffersPage /></AppShell>} />
       <Route path="/checkout" component={() => <AppShell><CheckoutPage /></AppShell>} />
       <Route path="/login" component={LoginPage} />
@@ -93,6 +112,7 @@ function App() {
               <Router />
             </WouterRouter>
             <Toaster />
+            <CookieConsentModal />
           </TooltipProvider>
         </CartProvider>
       </AuthProvider>

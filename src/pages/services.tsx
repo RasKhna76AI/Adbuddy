@@ -47,54 +47,6 @@ export default function Services() {
         </div>
       </section>
 
-      {/* Top Missions Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-50">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-            <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} transition={{ duration: 0.6 }} viewport={{ once: true }}>
-              <p className="text-sm font-semibold text-primary mb-3">Philosophy</p>
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">Our Top Missions</h2>
-              <p className="text-gray-600 mb-4 leading-relaxed">
-                A wonderful serenity has taken possession of my entire soul like these sweet mornings of spring which I enjoy with my whole heart, and I along the enchanting banks of my intimate universe.
-              </p>
-              <p className="text-gray-600 leading-relaxed">
-                The happy in my near friend so absorbed in the exquisite sense of mere tranquil existence, that I regret my talents.
-              </p>
-            </motion.div>
-            <motion.div initial={{ opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }} transition={{ duration: 0.6 }} viewport={{ once: true }}>
-              <img
-                src="https://images.unsplash.com/photo-1439130490301-25e322d88054?w=600&q=80"
-                alt="Our Top Missions"
-                className="rounded-2xl shadow-lg"
-              />
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* Solutions Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-          <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} transition={{ duration: 0.6 }} viewport={{ once: true }}>
-            <img
-              src="https://images.unsplash.com/photo-1493976040374-85c8e12ea389?w=600&q=80"
-              alt="Solutions"
-              className="rounded-2xl shadow-lg"
-            />
-          </motion.div>
-          <motion.div initial={{ opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }} transition={{ duration: 0.6 }} viewport={{ once: true }}>
-            <p className="text-sm font-semibold text-primary mb-3">Services</p>
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">We Provide Solutions</h2>
-            <p className="text-gray-600 mb-4 leading-relaxed">
-              A wonderful serenity has taken possession of my entire soul like these sweet mornings of spring which I enjoy with my whole heart, and I along the enchanting banks.
-            </p>
-            <p className="text-gray-600 leading-relaxed">
-              The happy in my near friend so absorbed in the exquisite sense of mere tranquil existence.
-            </p>
-          </motion.div>
-        </div>
-      </section>
-
       {/* Solo Travel Section */}
       <SoloTravelSection />
 

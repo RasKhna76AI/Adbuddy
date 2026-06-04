@@ -126,9 +126,14 @@ export default function SoloTravelSection() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
+            className="max-w-6xl mx-auto px-4"
           >
-            <h3 className="text-2xl font-bold text-gray-900 mb-8 text-center">Popular Solo Packages</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {/* Centered Headline Core Element */}
+            <h3 className="text-3xl font-black text-foreground mb-10 text-center tracking-tight">
+              Popular Uttarakhand Outings
+            </h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-center items-center">
               {cards.map((card, idx) => (
                 <motion.div
                   key={card.id}
@@ -136,52 +141,62 @@ export default function SoloTravelSection() {
                   whileInView={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.3, delay: idx * 0.1 }}
                   viewport={{ once: true }}
-                  className="group relative"
+                  className="group relative w-full mx-auto"
                 >
-                  <div className="relative overflow-hidden rounded-2xl aspect-[3/4] cursor-pointer">
+                  {/* Smooth Rounded Corner Frame Layout Container */}
+                  <div className="relative overflow-hidden rounded-[24px] aspect-[3/4] cursor-pointer bg-card border border-border/40 shadow-sm hover:shadow-xl transition-all duration-300">
                     <img
                       src={card.image}
                       alt={card.title}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                    {/* Bottom Heavy Protective Overlay Vignette */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/5" />
 
+                    {/* Floating Top Card Badging Layout */}
                     <div className="absolute top-4 left-4 right-4 flex items-start justify-between">
-                      <Badge className="bg-blue-600 text-white border-none text-xs font-bold px-3 shadow-lg">
-                        Solo
+                      <Badge className="bg-primary text-primary-foreground border-none text-xs font-bold px-3 shadow-md rounded-full">
+                        Featured
                       </Badge>
-                      <div className="ml-auto flex items-center gap-1 bg-black/40 backdrop-blur-sm rounded-full px-2.5 py-1">
+                      <div className="ml-auto flex items-center gap-1 bg-black/40 backdrop-blur-md rounded-full px-2.5 py-1 border border-white/10">
                         <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
-                        <span className="text-white text-xs font-bold">{card.rating.toFixed(1)}</span>
+                        <span className="text-white text-xs font-black">{(card.rating || 0).toFixed(1)}</span>
                       </div>
                     </div>
 
-                    <div className="absolute bottom-0 left-0 right-0 p-5 translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
-                      <div className="flex items-center gap-1.5 text-white/70 text-xs mb-1">
-                        <MapPin className="h-3 w-3" />
-                        <span>{card.destination}</span>
+                    {/* Interaction Responsive Base Context Block */}
+                    <div className="absolute bottom-0 left-0 right-0 p-5 translate-y-3 group-hover:translate-y-0 transition-transform duration-300">
+                      <div className="flex items-center gap-1 text-white/80 text-xs mb-1 font-medium">
+                        <MapPin className="h-3 w-3 text-primary" />
+                        <span className="truncate">{card.destination}</span>
                       </div>
-                      <h3 className="text-white font-bold text-xl mb-2 leading-tight">{card.title}</h3>
+                      <h3 className="text-white font-black text-xl mb-2 leading-tight tracking-tight">
+                        {card.title}
+                      </h3>
 
-                      <div className="mb-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <p className="text-white/70 text-xs mb-2">Activities:</p>
+                      {/* Animated Activity Tags block layout */}
+                      <div className="mb-4 h-0 opacity-0 group-hover:h-auto group-hover:opacity-100 transition-all duration-300 overflow-hidden">
+                        <p className="text-white/60 text-[11px] uppercase tracking-wider font-bold mb-1.5">Highlights</p>
                         <div className="flex flex-wrap gap-1">
-                          {card.activities.slice(0, 3).map((activity, idx) => (
-                            <span key={idx} className="text-xs bg-blue-600/80 text-white px-2 py-1 rounded-full">
+                          {card.activities.slice(0, 3).map((activity, i) => (
+                            <span key={i} className="text-[10px] bg-primary/90 font-semibold text-primary-foreground px-2.5 py-0.5 rounded-full backdrop-blur-sm shadow-sm">
                               {activity}
                             </span>
                           ))}
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between">
+                      {/* Pricing & Call-to-Action segment */}
+                      <div className="flex items-center justify-between border-t border-white/10 pt-3">
                         <div>
-                          <p className="text-white/60 text-xs">From</p>
-                          <p className="text-white font-black text-lg">${card.price.toLocaleString()}</p>
+                          <p className="text-white/50 text-[10px] uppercase font-bold tracking-wide">Starting from</p>
+                          <p className="text-white font-black text-xl tracking-wide">
+                            ₹{card.price.toLocaleString('en-IN')}
+                          </p>
                         </div>
                         <button
                           onClick={() => setBookingOpen(true)}
-                          className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0 shadow-lg"
+                          className="bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-black px-4 py-2.5 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0 shadow-md"
                         >
                           Explore →
                         </button>
