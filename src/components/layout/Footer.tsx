@@ -8,8 +8,12 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           <div className="lg:col-span-1">
             <Link href="/" className="flex items-center gap-2 mb-5">
-              <Compass className="h-6 w-6 text-primary" />
-              <span className="text-xl font-bold text-white">TRAVEL</span>
+              <img 
+                src="/logo.png" 
+                alt="AdventureBuddy Logo" 
+                className="h-8 w-auto object-contain" 
+              />
+              <span className="text-xl font-bold text-white">AdventureBuddy</span>
             </Link>
             <p className="text-sm text-slate-400 leading-relaxed mb-6">
               Discover extraordinary destinations worldwide with your most trusted travel companion.

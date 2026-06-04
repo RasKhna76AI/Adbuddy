@@ -62,9 +62,13 @@ export function Header() {
     <>
       <header className={`sticky top-0 z-50 w-full transition-all duration-300 ${scrolled ? 'bg-background/95 backdrop-blur-md border-b border-border shadow-sm' : 'bg-background/80 backdrop-blur-sm border-b border-border/50'}`}>
         <div className="container flex h-16 items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <Compass className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold tracking-tight">TRAVEL</span>
+          <Link href="/" className="flex items-center gap-2.5">
+            <img 
+              src="/logo.png" 
+              alt="AdventureBuddy Logo" 
+              className="h-8 w-auto object-contain" 
+            />
+            <span className="text-xl font-bold tracking-tight">AdventureBuddy</span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-1">
