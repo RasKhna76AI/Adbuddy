@@ -64,7 +64,7 @@ export function TopDestinations() {
             viewport={{ once: true }}
           >
             <p className="text-primary font-semibold text-sm uppercase tracking-wider mb-2">Popular Picks</p>
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground">Top Destinations</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-blue-950">Top Destinations</h2>
           </motion.div>
           <Link href="/destinations">
             <Button variant="outline" className="hidden md:flex rounded-full">View All Destinations</Button>

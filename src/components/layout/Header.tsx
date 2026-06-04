@@ -71,27 +71,48 @@ export function Header() {
             <span className="text-xl font-bold tracking-tight">AdventureBuddy</span>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-1">
+          {/* REDESIGNED DESKTOP NAVIGATION */}
+          <nav className="hidden md:flex items-center gap-1.5 px-2 py-1 bg-secondary/30 rounded-full border border-border/40">
             {navLinks.map((link) => {
               const isSubmenu = 'submenu' in link;
+              const isActive = location === link.href;
 
               if (isSubmenu) {
+                // Keep parent highlighted if one of its children routes is active
+                const isSubmenuActive = link.submenu?.some(item => location === item.href);
+
                 return (
                   <DropdownMenu key={link.label}>
                     <DropdownMenuTrigger asChild>
-                      <button className={`px-4 py-2 text-sm font-medium rounded-full transition-colors flex items-center gap-1 text-foreground/70 hover:text-foreground hover:bg-secondary`}>
+                      <button className={`group px-4 py-2 text-sm font-semibold rounded-full transition-all duration-300 flex items-center gap-1.5 outline-none relative ${
+                        isSubmenuActive 
+                          ? 'text-primary bg-primary/10 shadow-sm' 
+                          : 'text-foreground/70 hover:text-foreground hover:bg-secondary'
+                      }`}>
                         {link.label}
-                        <ChevronDown className="h-4 w-4" />
+                        <ChevronDown className="h-3.5 w-3.5 opacity-70 transition-transform duration-300 group-data-[state=open]:rotate-180 group-hover:opacity-100" />
                       </button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start">
-                      {link.submenu?.map((item) => (
-                        <Link key={item.href} href={item.href}>
-                          <DropdownMenuItem className="cursor-pointer">
-                            {item.label}
-                          </DropdownMenuItem>
-                        </Link>
-                      ))}
+                    <DropdownMenuContent 
+                      align="start" 
+                      sideOffset={6}
+                      className="w-52 p-1.5 bg-background/95 backdrop-blur-md border border-border rounded-xl shadow-lg animate-in fade-in-50 slide-in-from-top-2 duration-200"
+                    >
+                      {link.submenu?.map((item) => {
+                        const isChildActive = location === item.href;
+                        return (
+                          <Link key={item.href} href={item.href}>
+                            <DropdownMenuItem className={`cursor-pointer rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 flex items-center justify-between ${
+                              isChildActive 
+                                ? 'bg-primary/10 text-primary font-bold focus:bg-primary/15 focus:text-primary' 
+                                : 'text-foreground/70 focus:text-foreground focus:bg-secondary/80'
+                            }`}>
+                              {item.label}
+                              {isChildActive && <span className="h-1.5 w-1.5 bg-primary rounded-full" />}
+                            </DropdownMenuItem>
+                          </Link>
+                        );
+                      })}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 );
@@ -99,7 +120,12 @@ export function Header() {
 
               return (
                 <Link key={link.href} href={link.href}
-                  className={`px-4 py-2 text-sm font-medium rounded-full transition-colors ${location === link.href ? 'text-primary bg-primary/10' : 'text-foreground/70 hover:text-foreground hover:bg-secondary'}`}>
+                  className={`px-4 py-2 text-sm font-semibold rounded-full transition-all duration-300 relative ${
+                    isActive 
+                      ? 'text-primary bg-primary/10 shadow-sm font-bold' 
+                      : 'text-foreground/70 hover:text-foreground hover:bg-secondary'
+                  }`}
+                >
                   {link.label}
                 </Link>
               );

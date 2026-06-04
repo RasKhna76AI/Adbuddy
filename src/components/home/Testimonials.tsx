@@ -49,7 +49,7 @@ export function Testimonials() {
             <span className="w-1.5 h-1.5 bg-primary rounded-full animate-ping" />
             Traveler Stories
           </div>
-          <h2 className="text-3xl md:text-5xl font-extrabold text-foreground tracking-tight">
+          <h2 className="text-3xl md:text-5xl font-extrabold text-blue-950 tracking-tight">
             What Travelers Say
           </h2>
           <div className="w-12 h-1 bg-primary/40 mx-auto mt-4 rounded-full" />

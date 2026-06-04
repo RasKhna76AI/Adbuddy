@@ -18,7 +18,7 @@ export function TravelGallery() {
             viewport={{ once: true }}
           >
             <p className="text-primary font-semibold text-sm uppercase tracking-wider mb-2">Captured Moments</p>
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground">Travel Gallery</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-blue-950">Travel Gallery</h2>
           </motion.div>
           <Link href="/gallery">
             <Button variant="outline" className="hidden md:flex rounded-full">View All Photos</Button>

@@ -92,7 +92,7 @@ export function PopularPackages() {
         <div className="flex items-end justify-between mb-12">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
             <p className="text-primary font-semibold text-sm uppercase tracking-wider mb-2">Handpicked For You</p>
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground">Popular Packages</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-blue-950">Popular Packages</h2>
           </motion.div>
           <Link href="/packages">
             <Button variant="outline" className="hidden md:flex rounded-full">View All Packages</Button>

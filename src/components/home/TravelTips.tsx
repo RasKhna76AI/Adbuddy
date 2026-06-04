@@ -20,7 +20,7 @@ export function TravelTips() {
             viewport={{ once: true }}
           >
             <p className="text-primary font-semibold text-sm uppercase tracking-wider mb-2">Expert Advice</p>
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground">Travel Tips &amp; Guides</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-blue-950">Travel Tips &amp; Guides</h2>
           </motion.div>
           <Link href="/blog">
             <Button variant="outline" className="hidden md:flex rounded-full">View All Articles</Button>

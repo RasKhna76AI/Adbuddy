@@ -17,6 +17,17 @@ interface ActivitySection {
 export default function CorporatePage() {
   const [bookingOpen, setBookingOpen] = useState(false);
 
+    const categories = [
+    { title: 'History', image: 'https://images.unsplash.com/photo-1548013146-72479768bada?w=400&q=80', desc: 'Explore historical heritage monuments and architectures.' },
+    { title: 'Romance', image: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400&q=80', desc: 'Unwind with beautiful views and scenic getaways.' },
+    { title: 'City Break', image: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=400&q=80', desc: 'Immerse into urban cultures and vibrant market spaces.' },
+    { title: 'Wellness', image: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=400&q=80', desc: 'Rejuvenate with mountain yoga and peaceful meditation.' },
+    { title: 'Adventure', image: 'https://images.unsplash.com/photo-1533240332313-0db49b459ad6?w=400&q=80', desc: 'Thrill yourself with climbing, paragliding and trekking.' },
+    { title: 'Beach', image: 'https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=400&q=80', desc: 'Relax alongside pristine waters and sunny shorelines.' },
+    { title: 'Wildlife', image: 'https://images.unsplash.com/photo-1470240731273-7821a6eeb6bd?w=400&q=80', desc: 'Encounter regional flora and fauna in deep reserves.' },
+    { title: 'Foodie', image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80', desc: 'Taste authenticity with traditional culinary walks.' },
+  ];
+
   const activities: ActivitySection[] = [
     {
       id: 'team_building',
@@ -210,6 +221,53 @@ export default function CorporatePage() {
               </div>
             </motion.div>
           ))}
+        </div>
+      </section>
+
+      {/* NEW BROWSE BY CATEGORY SECTION (Matches layout structure from activitys.jpg) */}
+      <section className="bg-slate-50/60 border-y border-slate-100 py-20 mb-20 relative">
+        <div className="absolute inset-0 opacity-5 mix-blend-overlay pointer-events-none bg-[radial-gradient(#000_1px,transparent_1px)] [background-size:16px_16px]" />
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12 space-y-3">
+            <p className="text-primary font-serif italic text-xl tracking-wide">
+              Browse By Category
+            </p>
+            <h2 className="text-3xl md:text-4xl font-black text-blue-950 tracking-tight">
+              Find Inspiration For Your Next Trip
+            </h2>
+            <p className="text-sm md:text-base text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+              Select your favorite travel style and uncover handpicked activities matching your lifestyle.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {categories.map((category, idx) => (
+              <motion.div
+                key={category.title}
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: idx * 0.05 }}
+                className="bg-white rounded-xl p-4 flex items-center gap-4 border border-slate-100 shadow-sm hover:shadow-md transition-all group cursor-pointer"
+              >
+                <div className="h-16 w-20 rounded-lg overflow-hidden shrink-0 bg-slate-100">
+                  <img
+                    src={category.image}
+                    alt={category.title}
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                </div>
+                <div className="space-y-0.5">
+                  <h4 className="font-bold text-slate-800 text-base tracking-tight group-hover:text-blue-600 transition-colors">
+                    {category.title}
+                  </h4>
+                  <p className="text-xs text-muted-foreground line-clamp-2 leading-tight">
+                    {category.desc}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
