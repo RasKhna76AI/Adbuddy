@@ -41,7 +41,7 @@ export function WhyChooseUs() {
           {/* LEFT SIDE CONTENT - Information and Guidelines */}
           <div className="lg:col-span-5 flex flex-col justify-center space-y-8">
             <div className="space-y-4">
-              <p className="text-primary font-serif italic text-xl tracking-wide">
+              <p className="text-primary font-bold text-xs uppercase tracking-widest">
                 Why Choose Us
               </p>
               <h2 className="text-3xl md:text-5xl font-black text-blue-950 tracking-tight leading-tight">

@@ -32,7 +32,7 @@ export function Testimonials() {
   const totalGroups = Math.ceil(testimonials.length / cardsPerPage);
 
   return (
-    <section className="py-24 bg-background relative overflow-hidden">
+    <section className="py-24 bg-purple-100 relative overflow-hidden">
       {/* Decorative Premium Shades/Meshes */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(var(--primary-rgb),0.06),transparent_45%)] pointer-events-none" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_80%,rgba(var(--primary-rgb),0.04),transparent_50%)] pointer-events-none" />

@@ -42,7 +42,7 @@ export function ForgotPasswordForm() {
           <div className="text-center mb-8">
             <Link href="/" className="inline-flex items-center gap-2 mb-6">
               <Compass className="h-6 w-6 text-primary" />
-              <span className="text-xl font-bold">TRAVEL</span>
+              <span className="text-xl font-bold">ADVENTUREBUDDY</span>
             </Link>
             {sent ? (
               <>

@@ -96,22 +96,43 @@ export function BookingForm({ open, onClose }: BookingFormProps) {
             className="relative z-10 w-full max-w-2xl bg-background rounded-2xl shadow-2xl overflow-hidden"
           >
             {/* Header */}
-            <div className="relative bg-primary px-8 py-6 text-white">
-              <button onClick={handleClose} className="absolute top-4 right-4 p-1.5 rounded-full bg-white/20 hover:bg-white/30 transition-colors">
-                <X className="h-4 w-4" />
-              </button>
-              <div className="flex items-center gap-2 mb-2">
-                <Plane className="h-5 w-5" />
-                <span className="font-bold text-lg">Plan Your Journey</span>
-              </div>
-              <p className="text-white/80 text-sm">Tell us your dream trip and our experts will craft the perfect itinerary</p>
-              {!submitted && (
-                <div className="flex gap-2 mt-4">
-                  {Array.from({ length: totalSteps }).map((_, i) => (
-                    <div key={i} className={`h-1 flex-1 rounded-full transition-colors ${i < step ? 'bg-white' : 'bg-white/30'}`} />
-                  ))}
+            {/* Header Container with Custom Background Image */}
+            <div 
+              className="relative bg-cover bg-center bg-no-repeat px-8 py-6 text-white border-b border-white/10"
+              style={{ backgroundImage: "url('/bgimage.jpg')" }}
+            >
+              {/* Inner Overlay to guarantee contrast and text legibility */}
+              <div className="absolute inset-0 backdrop-blur-sm z-0" />
+
+              {/* Interactive Elements Layer */}
+              <div className="relative z-10">
+                <button 
+                  onClick={handleClose} 
+                  className="absolute top-0 right-0 p-1.5 rounded-full bg-white/10 hover:bg-primary/20 transition-colors text-green-400 hover:text-white"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+                
+                <div className="flex items-center gap-2 mb-2">
+                  <Plane className="h-5 w-5 text-primary" />
+                  <span className="font-black text-xl tracking-tight">Plan Your Journey</span>
                 </div>
-              )}
+                
+                <p className="text-slate-300 text-xs md:text-sm font-medium">
+                  Tell us your dream trip and our experts will craft the perfect itinerary
+                </p>
+                
+                {!submitted && (
+                  <div className="flex gap-2 mt-4">
+                    {Array.from({ length: totalSteps }).map((_, i) => (
+                      <div 
+                        key={i} 
+                        className={`h-1 flex-1 rounded-full transition-colors ${i < step ? 'bg-green-500' : 'bg-white/20'}`} 
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="p-8">

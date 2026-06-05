@@ -47,7 +47,7 @@ export function ResetPasswordForm() {
           <div className="text-center mb-8">
             <Link href="/" className="inline-flex items-center gap-2 mb-6">
               <Compass className="h-6 w-6 text-primary" />
-              <span className="text-xl font-bold">TRAVEL</span>
+              <span className="text-xl font-bold">ADVENTUREBUDDY</span>
             </Link>
             <h1 className="text-2xl font-bold text-foreground">Set new password</h1>
             <p className="text-muted-foreground text-sm mt-1">Choose a strong new password for your account</p>

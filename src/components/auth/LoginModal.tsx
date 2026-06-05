@@ -92,7 +92,7 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
               <div className="relative z-10">
                 <div className="flex items-center gap-2 mb-6">
                   <Compass className="h-6 w-6 text-white" />
-                  <span className="text-white font-bold text-lg">TRAVEL</span>
+                  <span className="text-white font-bold text-lg">ADVENTUREBUDDY</span>
                 </div>
                 <h2 className="text-white text-2xl font-bold leading-snug mb-2">
                   Your next adventure starts here
