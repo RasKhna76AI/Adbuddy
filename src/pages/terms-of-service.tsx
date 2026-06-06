@@ -31,7 +31,7 @@ export default function TermsOfServicePage() {
           <p>All group, solo, or corporate itineraries are managed under strict, non-negotiable financial clearings:</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="bg-slate-50 border border-slate-100 p-4 rounded-xl">
-              <span className="text-[10px] font-bold tracking-wider text-blue-600 bg-blue-50 px-2 py-0.5 rounded uppercase">Advance Clearance</span>
+              <span className="text-[10px] font-bold tracking-wider text-green-600 bg-green-50 px-2 py-0.5 rounded uppercase">Advance Clearance</span>
               <p className="text-xs text-slate-500 mt-2 font-medium">A mandatory 30% advance deposit is required to lock operational reservations for hotels, local transport fleets, and guides.</p>
             </div>
             <div className="bg-slate-50 border border-slate-100 p-4 rounded-xl">
@@ -57,7 +57,7 @@ export default function TermsOfServicePage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-medium text-slate-500">
-                <tr><td className="p-3 text-[#0E2A47]">30+ Days Prior to Launch</td><td className="p-3 text-right text-blue-600">100% Full Refund</td></tr>
+                <tr><td className="p-3 text-[#0E2A47]">30+ Days Prior to Launch</td><td className="p-3 text-right text-green-600">100% Full Refund</td></tr>
                 <tr><td className="p-3 text-[#0E2A47]">15–29 Days Prior to Launch</td><td className="p-3 text-right">75% Package Value</td></tr>
                 <tr><td className="p-3 text-[#0E2A47]">7–14 Days Prior to Launch</td><td className="p-3 text-right">50% Package Value</td></tr>
                 <tr><td className="p-3 text-[#0E2A47]">Within 7 Days / No-Show Range</td><td className="p-3 text-right text-orange-600">0% Absolute Forfeiture</td></tr>
@@ -137,13 +137,13 @@ export default function TermsOfServicePage() {
   }, [searchQuery, activeTab, termsData]);
 
   return (
-    <div className="min-h-screen bg-white text-slate-800 selection:bg-blue-50">
+    <div className="min-h-screen bg-slate-100 text-slate-800 selection:bg-green-50">
       
       {/* CORPORATE HEADLINE PANEL WITH NAVY BACKGROUND OVERLAY */}
       <section className="relative overflow-hidden bg-[#0E2A47] pt-32 pb-24 text-center">
         <div className="absolute inset-0 opacity-5 bg-[linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)] bg-[size:20px_30px] pointer-events-none" />
         <div className="max-w-4xl mx-auto px-4 relative z-10 space-y-4">
-          <span className="text-orange-500 font-serif italic text-lg tracking-wide block">
+          <span className="text-green-500 font-serif italic text-lg tracking-wide block">
             Adventure Buddy Legal Framework
           </span>
           <h1 className="text-3xl md:text-5xl font-black text-white tracking-tight">
@@ -179,7 +179,7 @@ export default function TermsOfServicePage() {
           <div className="flex flex-wrap gap-1.5 justify-center md:justify-start">
             <button
               onClick={() => setActiveTab('all')}
-              className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${activeTab === 'all' ? 'bg-blue-600 text-white' : 'text-slate-500 hover:bg-slate-200/60'}`}
+              className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${activeTab === 'all' ? 'bg-green-600 text-white' : 'text-slate-500 hover:bg-slate-200/60'}`}
             >
               All Provisions
             </button>
@@ -187,7 +187,7 @@ export default function TermsOfServicePage() {
               <button
                 key={term.id}
                 onClick={() => setActiveTab(term.id)}
-                className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all hidden lg:block ${activeTab === term.id ? 'bg-blue-600 text-white' : 'text-slate-500 hover:bg-slate-200/60'}`}
+                className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all hidden lg:block ${activeTab === term.id ? 'bg-green-600 text-white' : 'text-slate-500 hover:bg-slate-200/60'}`}
               >
                 {term.title.split('.')[0]}. Section
               </button>
@@ -199,7 +199,7 @@ export default function TermsOfServicePage() {
               placeholder="Search exact clause..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-3 py-2 rounded-md border border-slate-200 text-xs bg-white focus:outline-none focus:border-blue-500 font-medium placeholder:text-slate-400"
+              className="w-full px-3 py-2 rounded-md border border-slate-200 text-xs bg-white focus:outline-none focus:border-green-500 font-medium placeholder:text-slate-400"
             />
           </div>
         </div>
@@ -222,7 +222,7 @@ export default function TermsOfServicePage() {
                       document.getElementById(`term-${term.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     }, 120);
                   }}
-                  className="text-xs font-medium text-slate-500 hover:text-blue-600 cursor-pointer transition-colors leading-tight"
+                  className="text-xs font-medium text-slate-500 hover:text-green-600 cursor-pointer transition-colors leading-tight"
                 >
                   {term.title}
                 </div>

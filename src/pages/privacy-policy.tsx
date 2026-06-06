@@ -56,11 +56,11 @@ export default function PrivacyPolicyPage() {
           <p>We leverage personal telemetry arrays exclusively under the following performance frameworks:</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
             <div className="border border-slate-100 p-4 rounded-xl">
-              <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded">Execution</span>
+              <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded">Execution</span>
               <p className="text-xs text-slate-500 mt-2">To process high-altitude permits, secure commercial hotel allocations, issue transaction tracking strings, and confirm ground vehicle provisions.</p>
             </div>
             <div className="border border-slate-100 p-4 rounded-xl">
-              <span className="text-xs font-bold text-orange-500 bg-orange-50 px-2 py-1 rounded">Compliance</span>
+              <span className="text-xs font-bold text-green-500 bg-green-50 px-2 py-1 rounded">Compliance</span>
               <p className="text-xs text-slate-500 mt-2">To align operations with national financial audit standards, security verification registries, and local regional border regulations.</p>
             </div>
           </div>
@@ -75,9 +75,9 @@ export default function PrivacyPolicyPage() {
           <p>
             Operating expeditions throughout Uttarakhand, the Himalayan inner lines, and plain corridors requires deep coordination with regional authorities. All identity data collected is managed under strict procedural conditions:
           </p>
-          <div className="p-4 border-l-4 border-orange-500 bg-orange-50/40 rounded-r-xl">
+          <div className="p-4 border-l-4 border-green-500 bg-green-50/40 rounded-r-xl">
             <p className="text-xs md:text-sm font-medium text-[#0E2A47] leading-relaxed">
-              <strong className="text-orange-600 font-bold">Government Redaction Protocol:</strong> If a user presents or references national security identification numbers (such as Aadhaar, MyNumber, or Resident Registration Numbers) to clear remote base camp checkpoints, those numbers are treated as write-only data. They are encrypted at rest, omitted entirely from public-facing screens, and never transmitted over plaintext networks.
+              <strong className="text-green-600 font-bold">Government Redaction Protocol:</strong> If a user presents or references national security identification numbers (such as Aadhaar, MyNumber, or Resident Registration Numbers) to clear remote base camp checkpoints, those numbers are treated as write-only data. They are encrypted at rest, omitted entirely from public-facing screens, and never transmitted over plaintext networks.
             </p>
           </div>
         </div>
@@ -89,7 +89,7 @@ export default function PrivacyPolicyPage() {
       content: (
         <div className="space-y-3 text-slate-600 text-sm md:text-base">
           <p>We do not market, lease, trade, or distribute your identity elements. Information shares are limited to certified partners executing your travel plan:</p>
-          <ul className="space-y-2 text-xs md:text-sm pl-4 list-decimal marker:font-bold marker:text-blue-600">
+          <ul className="space-y-2 text-xs md:text-sm pl-4 list-decimal marker:font-bold marker:text-green-600">
             <li>Regional destination hoteliers, homestay hosts, and base-camp logistics managers.</li>
             <li>Certified transit pilots and off-road driving partners navigating mountain sectors.</li>
             <li>Payment gateway systems processing corporate UPI, net banking, or tokenized cards.</li>
@@ -145,13 +145,13 @@ export default function PrivacyPolicyPage() {
   }, [searchQuery, activeTab, legalSections]);
 
   return (
-    <div className="min-h-screen bg-white text-slate-800 selection:bg-blue-50">
+    <div className="min-h-screen bg-slate-100 text-slate-800 selection:bg-green-50">
       
-      {/* HEADER SECTION WITH TOPOGRAPHY BLUE OVERLAY */}
+      {/* HEADER SECTION WITH TOPOGRAPHY green OVERLAY */}
       <section className="relative overflow-hidden bg-[#0E2A47] pt-32 pb-24 text-center">
         <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none" />
         <div className="max-w-4xl mx-auto px-4 relative z-10 space-y-4">
-          <span className="text-orange-500 font-serif italic text-lg tracking-wide block">
+          <span className="text-green-500 font-serif italic text-lg tracking-wide block">
             Adventure Buddy Legal Operations
           </span>
           <h1 className="text-3xl md:text-5xl font-black text-white tracking-tight">
@@ -187,7 +187,7 @@ export default function PrivacyPolicyPage() {
           <div className="flex flex-wrap gap-1.5 justify-center md:justify-start">
             <button
               onClick={() => setActiveTab('all')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${activeTab === 'all' ? 'bg-blue-600 text-white' : 'text-slate-500 hover:bg-slate-200/60'}`}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${activeTab === 'all' ? 'bg-green-600 text-white' : 'text-slate-500 hover:bg-slate-200/60'}`}
             >
               Show All Clauses
             </button>
@@ -195,7 +195,7 @@ export default function PrivacyPolicyPage() {
               <button
                 key={sec.id}
                 onClick={() => setActiveTab(sec.id)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all hidden lg:block ${activeTab === sec.id ? 'bg-blue-600 text-white' : 'text-slate-500 hover:bg-slate-200/60'}`}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all hidden lg:block ${activeTab === sec.id ? 'bg-green-600 text-white' : 'text-slate-500 hover:bg-slate-200/60'}`}
               >
                 {sec.title.split('.')[0]}. Section
               </button>
@@ -207,7 +207,7 @@ export default function PrivacyPolicyPage() {
               placeholder="Filter policy terms..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs bg-white focus:outline-none focus:border-blue-500 font-medium placeholder:text-slate-400"
+              className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs bg-white focus:outline-none focus:border-green-500 font-medium placeholder:text-slate-400"
             />
           </div>
         </div>
@@ -230,7 +230,7 @@ export default function PrivacyPolicyPage() {
                       document.getElementById(`sec-${sec.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     }, 100);
                   }}
-                  className="text-xs font-medium text-slate-500 hover:text-blue-600 cursor-pointer py-1 truncate transition-colors"
+                  className="text-xs font-medium text-slate-500 hover:text-green-600 cursor-pointer py-1 truncate transition-colors"
                 >
                   {sec.title}
                 </div>

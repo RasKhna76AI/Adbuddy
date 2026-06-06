@@ -51,13 +51,13 @@ export default function CookiePolicyPage() {
             {/* Performance Tracker */}
             <div className="border border-slate-100 rounded-xl p-4 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="max-w-xl">
-                <span className="text-[10px] font-bold tracking-wider text-blue-600 bg-blue-50 px-2 py-0.5 rounded uppercase">Category 02: Performance & Analytics</span>
+                <span className="text-[10px] font-bold tracking-wider text-green-600 bg-green-50 px-2 py-0.5 rounded uppercase">Category 02: Performance & Analytics</span>
                 <p className="text-xs text-slate-500 mt-1 font-medium">Aggregates anonymous interaction telemetry via Google Analytics modules. Helps us identify broken interface links, load speeds across rural server networks, and overall traffic density maps.</p>
               </div>
               <div className="shrink-0">
                 <button 
                   onClick={() => setPerformanceConsent(!performanceConsent)}
-                  className={`text-xs font-bold px-4 py-2 rounded-md transition-all ${performanceConsent ? 'bg-blue-600 text-white' : 'bg-white border border-slate-200 text-slate-500'}`}
+                  className={`text-xs font-bold px-4 py-2 rounded-md transition-all ${performanceConsent ? 'bg-green-600 text-white' : 'bg-white border border-slate-200 text-slate-500'}`}
                 >
                   {performanceConsent ? 'Consent Granted' : 'Opt-Out Selected'}
                 </button>
@@ -67,13 +67,13 @@ export default function CookiePolicyPage() {
             {/* Functional Tracker */}
             <div className="border border-slate-100 rounded-xl p-4 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="max-w-xl">
-                <span className="text-[10px] font-bold tracking-wider text-orange-600 bg-orange-50 px-2 py-0.5 rounded uppercase">Category 03: Functional Customization</span>
+                <span className="text-[10px] font-bold tracking-wider text-green-600 bg-green-50 px-2 py-0.5 rounded uppercase">Category 03: Functional Customization</span>
                 <p className="text-xs text-slate-500 mt-1 font-medium">Saves personalized settings such as localized currencies (INR), regional routing options, and persistent itinerary notes across active user sessions.</p>
               </div>
               <div className="shrink-0">
                 <button 
                   onClick={() => setFunctionalConsent(!functionalConsent)}
-                  className={`text-xs font-bold px-4 py-2 rounded-md transition-all ${functionalConsent ? 'bg-blue-600 text-white' : 'bg-white border border-slate-200 text-slate-500'}`}
+                  className={`text-xs font-bold px-4 py-2 rounded-md transition-all ${functionalConsent ? 'bg-green-600 text-white' : 'bg-white border border-slate-200 text-slate-500'}`}
                 >
                   {functionalConsent ? 'Consent Granted' : 'Opt-Out Selected'}
                 </button>
@@ -89,7 +89,7 @@ export default function CookiePolicyPage() {
               <div className="shrink-0">
                 <button 
                   onClick={() => setMarketingConsent(!marketingConsent)}
-                  className={`text-xs font-bold px-4 py-2 rounded-md transition-all ${marketingConsent ? 'bg-blue-600 text-white' : 'bg-white border border-slate-200 text-slate-500'}`}
+                  className={`text-xs font-bold px-4 py-2 rounded-md transition-all ${marketingConsent ? 'bg-green-600 text-white' : 'bg-white border border-slate-200 text-slate-500'}`}
                 >
                   {marketingConsent ? 'Consent Granted' : 'Opt-Out Selected'}
                 </button>
@@ -146,8 +146,8 @@ export default function CookiePolicyPage() {
           <p>
             We process digital identifiers in compliance with current regional data protection laws and international privacy frameworks.
           </p>
-          <div className="p-4 bg-orange-50/40 border-l-4 border-orange-500 rounded-r-xl text-xs md:text-sm text-slate-600 font-medium leading-relaxed">
-            <strong className="text-orange-600 font-bold block mb-1">Identity Processing Rule:</strong> 
+          <div className="p-4 bg-green-50/40 border-l-4 border-green-500 rounded-r-xl text-xs md:text-sm text-slate-600 font-medium leading-relaxed">
+            <strong className="text-green-600 font-bold block mb-1">Identity Processing Rule:</strong> 
             While evaluating group bookings or high-altitude transit requirements across checkpoints, we never store, link, or combine automated browser cookie logs with highly sensitive personal identifiers (such as international passports, Aadhaar numbers, or related national registration numbers). This data is isolated inside hardened, write-only databases to secure your digital footprint.
           </div>
         </div>
@@ -182,13 +182,13 @@ export default function CookiePolicyPage() {
   }, [searchQuery, activeTab, cookieSections]);
 
   return (
-    <div className="min-h-screen bg-white text-slate-800 selection:bg-blue-50">
+    <div className="min-h-screen bg-slate-100 text-slate-800 selection:bg-green-50">
       
       {/* PROFESSIONAL OVERLAY HERO BANNER */}
       <section className="relative overflow-hidden bg-[#0E2A47] pt-32 pb-24 text-center">
         <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none" />
         <div className="max-w-4xl mx-auto px-4 relative z-10 space-y-4">
-          <span className="text-orange-500 font-serif italic text-lg tracking-wide block">
+          <span className="text-green-500 font-serif italic text-lg tracking-wide block">
             Adventure Buddy Core Operations
           </span>
           <h1 className="text-3xl md:text-5xl font-black text-white tracking-tight">
@@ -224,7 +224,7 @@ export default function CookiePolicyPage() {
           <div className="flex flex-wrap gap-1.5 justify-center md:justify-start">
             <button
               onClick={() => setActiveTab('all')}
-              className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${activeTab === 'all' ? 'bg-blue-600 text-white' : 'text-slate-500 hover:bg-slate-200/60'}`}
+              className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${activeTab === 'all' ? 'bg-green-600 text-white' : 'text-slate-500 hover:bg-slate-200/60'}`}
             >
               View Full Framework
             </button>
@@ -232,7 +232,7 @@ export default function CookiePolicyPage() {
               <button
                 key={sec.id}
                 onClick={() => setActiveTab(sec.id)}
-                className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all hidden lg:block ${activeTab === sec.id ? 'bg-blue-600 text-white' : 'text-slate-500 hover:bg-slate-200/60'}`}
+                className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all hidden lg:block ${activeTab === sec.id ? 'bg-green-600 text-white' : 'text-slate-500 hover:bg-slate-200/60'}`}
               >
                 {sec.title.split('.')[0]}. Index
               </button>
@@ -244,7 +244,7 @@ export default function CookiePolicyPage() {
               placeholder="Filter specific tracker terms..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-3 py-2 rounded-md border border-slate-200 text-xs bg-white focus:outline-none focus:border-blue-500 font-medium placeholder:text-slate-400"
+              className="w-full px-3 py-2 rounded-md border border-slate-200 text-xs bg-white focus:outline-none focus:border-green-500 font-medium placeholder:text-slate-400"
             />
           </div>
         </div>
@@ -267,7 +267,7 @@ export default function CookiePolicyPage() {
                       document.getElementById(`cookie-${sec.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     }, 120);
                   }}
-                  className="text-xs font-medium text-slate-500 hover:text-blue-600 cursor-pointer transition-colors leading-tight"
+                  className="text-xs font-medium text-slate-500 hover:text-green-600 cursor-pointer transition-colors leading-tight"
                 >
                   {sec.title}
                 </div>
