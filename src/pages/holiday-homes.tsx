@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Chrome as Home, Users, Star, MapPin, Phone, Wifi, Car, BedDouble, Bath, Check, ListFilter as Filter, TreePalm, Waves } from 'lucide-react';
+import { Chrome as Home, Users, Star, MapPin, Phone, Wifi, Car, BedDouble, Bath, ListFilter as Filter, TreePalm, Waves } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/supabase';
+import { BookingForm } from '@/components/home/BookingForm'; // 1. IMPORT THE BOOKING FORM
 
 interface HolidayHome {
   id: string;
@@ -45,7 +46,7 @@ const homeTypeColors: Record<string, string> = {
   villa: 'bg-purple-100 text-purple-700',
   cottage: 'bg-green-100 text-green-700',
   farmhouse: 'bg-amber-100 text-amber-700',
-  apartment: 'bg-blue-100 text-blue-700',
+  apartment: 'bg-green-100 text-green-700',
   bungalow: 'bg-rose-100 text-rose-700',
 };
 
@@ -54,6 +55,10 @@ export default function HolidayHomesPage() {
   const [loading, setLoading] = useState(true);
   const [selectedType, setSelectedType] = useState<string>('all');
   const [selectedLocation, setSelectedLocation] = useState<string>('all');
+  
+  // 2. ADD STATES FOR CONTROL AND SELECTION
+  const [bookingOpen, setBookingOpen] = useState(false);
+  const [selectedHomeName, setSelectedHomeName] = useState<string>('');
 
   useEffect(() => {
     fetchHomes();
@@ -84,6 +89,12 @@ export default function HolidayHomesPage() {
     if (selectedLocation !== 'all' && home.location !== selectedLocation) return false;
     return true;
   });
+
+  // 3. ACTION TO ATTACH HOME DATA AND TRIGGER DISPLAY
+  const handleOpenBooking = (homeName: string) => {
+    setSelectedHomeName(homeName);
+    setBookingOpen(true);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 pt-20">
@@ -136,7 +147,7 @@ export default function HolidayHomesPage() {
           </span>
         </div>
 
-        {/* Homes List - Row View */}
+        {/* Homes List */}
         {loading ? (
           <div className="text-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto" />
@@ -169,7 +180,7 @@ export default function HolidayHomesPage() {
                       {homeTypeLabels[home.home_type] || home.home_type}
                     </span>
                     {home.distance_from_beach !== null && home.distance_from_beach < 1 && (
-                      <span className="absolute top-3 right-3 px-2 py-1 bg-blue-500 text-white text-xs font-semibold rounded-full flex items-center gap-1">
+                      <span className="absolute top-3 right-3 px-2 py-1 bg-green-500 text-white text-xs font-semibold rounded-full flex items-center gap-1">
                         <Waves className="h-3 w-3" /> Beach
                       </span>
                     )}
@@ -218,7 +229,7 @@ export default function HolidayHomesPage() {
                         </span>
                       )}
                       {home.has_pool && (
-                        <span className="flex items-center gap-1 text-xs text-gray-600 px-2 py-1 bg-blue-50 rounded">
+                        <span className="flex items-center gap-1 text-xs text-gray-600 px-2 py-1 bg-green-50 rounded">
                           Pool
                         </span>
                       )}
@@ -243,7 +254,7 @@ export default function HolidayHomesPage() {
                     <div className="flex flex-wrap gap-3 mt-3 text-xs text-gray-500">
                       {home.distance_from_beach !== null && (
                         <span className="flex items-center gap-1">
-                          <Waves className="h-3 w-3 text-blue-500" /> {home.distance_from_beach} km to beach
+                          <Waves className="h-3 w-3 text-green-500" /> {home.distance_from_beach} km to beach
                         </span>
                       )}
                       <span className="flex items-center gap-1">
@@ -260,11 +271,16 @@ export default function HolidayHomesPage() {
                         </p>
                       </div>
                       <div className="flex gap-3 mt-4 md:mt-0">
-                        <Button variant="outline" className="flex items-center gap-2">
-                          <Phone className="h-4 w-4" />
-                          Contact Host
+                        <Button variant="outline" asChild className="flex items-center gap-2 cursor-pointer">
+                          <a href={`tel:${home.contact_number}`}>
+                            <Phone className="h-4 w-4" />
+                            Contact Host
+                          </a>
                         </Button>
-                        <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                        <Button 
+                          className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                          onClick={() => handleOpenBooking(home.home_name)} // 4. BIND ACTION TO BUTTON
+                        >
                           Book Now
                         </Button>
                       </div>
@@ -276,6 +292,12 @@ export default function HolidayHomesPage() {
           </div>
         )}
       </div>
+
+      {/* 5. PLACE COMPONENT IN LAYOUT TREE WITH DRILL PROPS */}
+      <BookingForm 
+        open={bookingOpen} 
+        onClose={() => setBookingOpen(false)} 
+      />
     </div>
   );
 }

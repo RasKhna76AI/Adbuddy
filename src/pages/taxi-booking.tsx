@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Car, Users, Star, MapPin, Phone, Clock, Check, ListFilter as Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/supabase';
+import { BookingForm } from '@/components/home/BookingForm';
 
 interface TaxiBooking {
   id: string;
@@ -34,6 +35,8 @@ export default function TaxiBookingPage() {
   const [loading, setLoading] = useState(true);
   const [selectedType, setSelectedType] = useState<string>('all');
   const [selectedLocation, setSelectedLocation] = useState<string>('all');
+  const [bookingOpen, setBookingOpen] = useState(false);
+  const [selectedTaxiName, setSelectedTaxiName] = useState<string>(''); // Cleaned up variable naming context
 
   useEffect(() => {
     fetchTaxis();
@@ -59,6 +62,11 @@ export default function TaxiBookingPage() {
   const locations = [...new Set(taxis.map(t => t.location))];
   const carTypes = [...new Set(taxis.map(t => t.car_type))];
 
+  const handleOpenBooking = (taxiName: string) => {
+    setSelectedTaxiName(taxiName);
+    setBookingOpen(true);
+  };
+
   const filteredTaxis = taxis.filter(taxi => {
     if (selectedType !== 'all' && taxi.car_type !== selectedType) return false;
     if (selectedLocation !== 'all' && taxi.location !== selectedLocation) return false;
@@ -74,11 +82,11 @@ export default function TaxiBookingPage() {
           alt="Taxi Booking"
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-blue-900/60 via-blue-900/70 to-blue-900/80" />
+        <div className="absolute inset-0 bg-gradient-to-b from-green-900/60 via-green-900/70 to-green-900/80" />
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
             <h1 className="text-4xl md:text-5xl font-black text-white mb-3">Taxi Booking</h1>
-            <p className="text-lg text-blue-100 max-w-xl mx-auto">
+            <p className="text-lg text-green-100 max-w-xl mx-auto">
               Reliable cabs with experienced drivers for your safe journey across Telangana
             </p>
           </motion.div>
@@ -93,7 +101,7 @@ export default function TaxiBookingPage() {
             <select
               value={selectedType}
               onChange={(e) => setSelectedType(e.target.value)}
-              className="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-700"
+              className="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 text-gray-700"
             >
               <option value="all">All Car Types</option>
               {carTypes.map(type => (
@@ -103,7 +111,7 @@ export default function TaxiBookingPage() {
             <select
               value={selectedLocation}
               onChange={(e) => setSelectedLocation(e.target.value)}
-              className="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-700"
+              className="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 text-gray-700"
             >
               <option value="all">All Locations</option>
               {locations.map(loc => (
@@ -116,10 +124,10 @@ export default function TaxiBookingPage() {
           </span>
         </div>
 
-        {/* Taxi List - Row View */}
+        {/* Taxi List */}
         {loading ? (
           <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto" />
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto" />
             <p className="text-gray-500 mt-4">Loading available taxis...</p>
           </div>
         ) : filteredTaxis.length === 0 ? (
@@ -152,7 +160,7 @@ export default function TaxiBookingPage() {
                     <div className="flex flex-wrap items-start justify-between gap-4">
                       <div>
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full uppercase">
+                          <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-semibold rounded-full uppercase">
                             {carTypeLabels[taxi.car_type] || taxi.car_type}
                           </span>
                           {taxi.ac_available && (
@@ -198,17 +206,22 @@ export default function TaxiBookingPage() {
                     <div className="flex flex-wrap items-center justify-between mt-6 pt-4 border-t border-gray-100">
                       <div>
                         <p className="text-sm text-gray-500">Starting from</p>
-                        <p className="text-2xl font-bold text-blue-600">
+                        <p className="text-2xl font-bold text-green-600">
                           Rs {taxi.price_per_km.toLocaleString('en-IN')}<span className="text-base font-normal text-gray-500">/km</span>
                         </p>
                         <p className="text-xs text-gray-500">Min. {taxi.min_km} km booking</p>
                       </div>
                       <div className="flex gap-3 mt-4 md:mt-0">
-                        <Button variant="outline" className="flex items-center gap-2">
-                          <Phone className="h-4 w-4" />
-                          Call
+                        <Button variant="outline" asChild className="flex items-center gap-2 cursor-pointer">
+                          <a href={`tel:${taxi.id}`}>
+                            <Phone className="h-4 w-4" />
+                            Call
+                          </a>
                         </Button>
-                        <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                        <Button 
+                          className="bg-green-600 hover:bg-green-700 text-white"
+                          onClick={() => handleOpenBooking(taxi.car_name)} // Fixed syntax placement
+                        >
                           Book Now
                         </Button>
                       </div>
@@ -220,6 +233,11 @@ export default function TaxiBookingPage() {
           </div>
         )}
       </div>
+
+      <BookingForm 
+        open={bookingOpen} 
+        onClose={() => setBookingOpen(false)} 
+      />
     </div>
   );
 }

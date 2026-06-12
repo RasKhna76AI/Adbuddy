@@ -51,7 +51,7 @@ export function HeroSearch() {
             disabled={tab.disabled}
             className={`flex items-center gap-2 px-4 py-3 rounded-t-lg font-semibold transition-all ${
               activeTab === tab.id
-                ? 'bg-white text-blue-600 shadow-lg'
+                ? 'bg-white text-primary shadow-lg'
                 : tab.disabled
                 ? 'bg-white/20 text-white/40 cursor-not-allowed'
                 : 'bg-white/30 text-white hover:bg-white/50'
@@ -91,10 +91,10 @@ export function HeroSearch() {
                   <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                   <input
                     type="text"
-                    placeholder={activeTab === 'taxi' ? 'Enter pickup city' : activeTab === 'hotel' ? 'Enter city' : 'Enter location'}
+                    placeholder={activeTab === 'taxi' ? 'Enter pickup Location' : activeTab === 'hotel' ? 'Enter city' : 'Enter location'}
                     value={searchData.from}
                     onChange={(e) => setSearchData({ ...searchData, from: e.target.value })}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-400"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400"
                   />
                 </div>
               </div>
@@ -110,10 +110,10 @@ export function HeroSearch() {
                       <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                       <input
                         type="text"
-                        placeholder="Enter drop city"
+                        placeholder="Enter drop Location"
                         value={searchData.to}
                         onChange={(e) => setSearchData({ ...searchData, to: e.target.value })}
-                        className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-400"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400"
                       />
                     </>
                   ) : (
@@ -123,7 +123,7 @@ export function HeroSearch() {
                         type="date"
                         value={searchData.pickupDate}
                         onChange={(e) => setSearchData({ ...searchData, pickupDate: e.target.value })}
-                        className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900"
                       />
                     </>
                   )}
@@ -144,7 +144,7 @@ export function HeroSearch() {
                       ...searchData,
                       [activeTab === 'taxi' ? 'pickupDate' : 'dropDate']: e.target.value
                     })}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900"
                   />
                 </div>
               </div>
@@ -159,7 +159,7 @@ export function HeroSearch() {
                   <select
                     value={searchData.guests}
                     onChange={(e) => setSearchData({ ...searchData, guests: e.target.value })}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 appearance-none bg-white"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900 appearance-none bg-white"
                   >
                     {activeTab === 'taxi' ? (
                       <>
@@ -187,7 +187,7 @@ export function HeroSearch() {
             <div className="flex justify-center">
               <Button
                 onClick={handleSearch}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-12 rounded-xl flex items-center gap-3 shadow-lg hover:shadow-xl transition-all text-lg"
+                className="bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-12 rounded-xl flex items-center gap-3 shadow-lg hover:shadow-xl transition-all text-lg"
               >
                 <Search className="h-5 w-5" />
                 Search

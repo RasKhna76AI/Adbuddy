@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Building2, Users, Star, MapPin, Phone, Wifi, Car, Utensils, Check, ListFilter as Filter } from 'lucide-react';
+import { Building2, Users, Star, MapPin, Phone, Wifi, Car, Utensils, ListFilter as Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/supabase';
+import { BookingForm } from '@/components/home/BookingForm';
 
 interface HotelBooking {
   id: string;
@@ -37,18 +38,22 @@ const hotelTypeLabels: Record<string, string> = {
 
 const hotelTypeColors: Record<string, string> = {
   budget: 'bg-gray-100 text-gray-700',
-  standard: 'bg-blue-100 text-blue-700',
+  standard: 'bg-green-100 text-green-700',
   premium: 'bg-purple-100 text-purple-700',
   luxury: 'bg-amber-100 text-amber-700',
   resort: 'bg-green-100 text-green-700',
 };
 
 export default function HotelBookingPage() {
+  const [bookingOpen, setBookingOpen] = useState(false);
   const [hotels, setHotels] = useState<HotelBooking[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedType, setSelectedType] = useState<string>('all');
   const [selectedLocation, setSelectedLocation] = useState<string>('all');
   const [priceRange, setPriceRange] = useState<string>('all');
+  
+  // Track selected item to supply contextual parameters to the form input
+  const [selectedHotelName, setSelectedHotelName] = useState<string>('');
 
   useEffect(() => {
     fetchHotels();
@@ -85,6 +90,11 @@ export default function HotelBookingPage() {
     return true;
   });
 
+  const handleOpenBooking = (hotelName: string) => {
+    setSelectedHotelName(hotelName);
+    setBookingOpen(true);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 pt-20">
       {/* Hero Section */}
@@ -94,11 +104,11 @@ export default function HotelBookingPage() {
           alt="Hotel Booking"
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-indigo-900/60 via-indigo-900/70 to-indigo-900/80" />
+        <div className="absolute inset-0 bg-gradient-to-b from-green-900/60 via-green-900/70 to-green-900/80" />
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
             <h1 className="text-4xl md:text-5xl font-black text-white mb-3">Hotel Booking</h1>
-            <p className="text-lg text-indigo-100 max-w-xl mx-auto">
+            <p className="text-lg text-green-100 max-w-xl mx-auto">
               Find the perfect stay from budget-friendly to luxury accommodations across Telangana
             </p>
           </motion.div>
@@ -113,7 +123,7 @@ export default function HotelBookingPage() {
             <select
               value={selectedType}
               onChange={(e) => setSelectedType(e.target.value)}
-              className="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 text-gray-700"
+              className="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 text-gray-700"
             >
               <option value="all">All Hotel Types</option>
               {hotelTypes.map(type => (
@@ -123,7 +133,7 @@ export default function HotelBookingPage() {
             <select
               value={selectedLocation}
               onChange={(e) => setSelectedLocation(e.target.value)}
-              className="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 text-gray-700"
+              className="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 text-gray-700"
             >
               <option value="all">All Locations</option>
               {locations.map(loc => (
@@ -133,7 +143,7 @@ export default function HotelBookingPage() {
             <select
               value={priceRange}
               onChange={(e) => setPriceRange(e.target.value)}
-              className="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 text-gray-700"
+              className="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 text-gray-700"
             >
               <option value="all">All Prices</option>
               <option value="budget">Budget (under Rs 2,000)</option>
@@ -146,10 +156,10 @@ export default function HotelBookingPage() {
           </span>
         </div>
 
-        {/* Hotel List - Row View */}
+        {/* Hotel List */}
         {loading ? (
           <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto" />
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto" />
             <p className="text-gray-500 mt-4">Loading available hotels...</p>
           </div>
         ) : filteredHotels.length === 0 ? (
@@ -210,8 +220,8 @@ export default function HotelBookingPage() {
                     <div className="flex flex-wrap gap-3 mt-4">
                       {hotel.ac_available && (
                         <span className="flex items-center gap-1 text-sm text-gray-600">
-                          <span className="w-6 h-6 rounded bg-blue-50 flex items-center justify-center">
-                            <span className="text-xs font-bold text-blue-600">AC</span>
+                          <span className="w-6 h-6 rounded bg-green-50 flex items-center justify-center">
+                            <span className="text-xs font-bold text-green-600">AC</span>
                           </span>
                         </span>
                       )}
@@ -248,16 +258,21 @@ export default function HotelBookingPage() {
                     <div className="flex flex-wrap items-center justify-between mt-6 pt-4 border-t border-gray-100">
                       <div>
                         <p className="text-sm text-gray-500">Starting from</p>
-                        <p className="text-2xl font-bold text-indigo-600">
+                        <p className="text-2xl font-bold text-green-600">
                           Rs {hotel.price_per_night.toLocaleString('en-IN')}<span className="text-base font-normal text-gray-500">/night</span>
                         </p>
                       </div>
                       <div className="flex gap-3 mt-4 md:mt-0">
-                        <Button variant="outline" className="flex items-center gap-2">
-                          <Phone className="h-4 w-4" />
-                          Call
+                        <Button variant="outline" asChild className="flex items-center gap-2 cursor-pointer">
+                          <a href={`tel:${hotel.contact_number}`}>
+                            <Phone className="h-4 w-4" />
+                            Call
+                          </a>
                         </Button>
-                        <Button className="bg-indigo-600 hover:bg-indigo-700 text-white">
+                        <Button 
+                          className="bg-green-600 hover:bg-green-700 text-white" 
+                          onClick={() => handleOpenBooking(hotel.hotel_name)}
+                        >
                           Book Now
                         </Button>
                       </div>
@@ -269,6 +284,12 @@ export default function HotelBookingPage() {
           </div>
         )}
       </div>
+
+      {/* RENDERED DRAWER/MODAL SYSTEM */}
+      <BookingForm 
+        open={bookingOpen} 
+        onClose={() => setBookingOpen(false)} 
+      />
     </div>
   );
 }
