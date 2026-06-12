@@ -40,11 +40,11 @@ const navLinks: NavLink[] = [
       {
         sectionTitle: "Core Booking Desks",
         items: [
-          { href: '/services/taxi-booking', label: 'Taxi Booking', desc: 'Hills-certified fleet transit', icon: Car },
-          { href: '/services/hotel-booking', label: 'Hotel Booking', desc: 'Verified alpine accommodations', icon: Hotel },
-          { href: '/services/train-ticket', label: 'Train Tickets', desc: 'IRCTC regional connectivity', icon: Train },
-          { href: '/services/flight-ticket', label: 'Flight Tickets', desc: 'Domestic & charter routes', icon: Plane },
-          { href: '/services/holiday-homes', label: 'Holiday Homes', desc: 'Exclusive local luxury stays', icon: Home },
+          { href: '/taxi-booking', label: 'Taxi Booking', desc: 'Hills-certified fleet transit', icon: Car },
+          { href: '/hotel-booking', label: 'Hotel Booking', desc: 'Verified alpine accommodations', icon: Hotel },
+          { href: '/train-booking', label: 'Train Tickets', desc: 'IRCTC regional connectivity', icon: Train },
+          { href: '/flight-booking', label: 'Flight Tickets', desc: 'Domestic & charter routes', icon: Plane },
+          { href: '/holiday-homes', label: 'Holiday Homes', desc: 'Exclusive local luxury stays', icon: Home },
         ]
       },
       {

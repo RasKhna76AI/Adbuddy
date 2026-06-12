@@ -41,6 +41,9 @@ import OrdersPage from "@/pages/dashboard/orders";
 import CancelHistoryPage from "@/pages/dashboard/cancel-history";
 import CheckoutPage from "@/pages/checkout";
 import OffersPage from "@/pages/offers";
+import TaxiBookingPage from "@/pages/taxi-booking";
+import HotelBookingPage from "@/pages/hotel-booking";
+import HolidayHomesPage from "@/pages/holiday-homes";
 
 const queryClient = new QueryClient();
 
@@ -88,6 +91,8 @@ function Router() {
       <Route path="/signup" component={SignupPage} />
       <Route path="/forgot-password" component={ForgotPasswordPage} />
       <Route path="/reset-password" component={ResetPasswordPage} />
+      
+      {/* Protected Dashboard Routes */}
       <Route path="/dashboard" component={() => <AppShell><ProtectedRoute component={DashboardPage} /></AppShell>} />
       <Route path="/dashboard/profile" component={() => <AppShell><ProtectedRoute component={ProfilePage} /></AppShell>} />
       <Route path="/dashboard/orders" component={() => <AppShell><ProtectedRoute component={OrdersPage} /></AppShell>} />
@@ -97,6 +102,15 @@ function Router() {
       <Route path="/dashboard/tx-history" component={() => <AppShell><ProtectedRoute component={TxHistoryPage} /></AppShell>} />
       <Route path="/dashboard/reset-password" component={() => <AppShell><ProtectedRoute component={DashboardResetPasswordPage} /></AppShell>} />
       <Route path="/dashboard/cancel-history" component={() => <AppShell><ProtectedRoute component={CancelHistoryPage} /></AppShell>} />
+      
+      {/* Booking Routes */}
+      <Route path="/taxi-booking" component={() => <AppShell><TaxiBookingPage /></AppShell>} />
+      <Route path="/hotel-booking" component={() => <AppShell><HotelBookingPage /></AppShell>} />
+      <Route path="/holiday-homes" component={() => <AppShell><HolidayHomesPage /></AppShell>} />
+      <Route path="/train-booking" component={NotFound} />
+      <Route path="/flight-booking" component={NotFound} />
+
+      {/* CATCH-ALL ROUTE MUST BE LAST */}
       <Route component={NotFound} />
     </Switch>
   );
